@@ -15,6 +15,7 @@ class LSA(object):
         self.contexts = []
         self.M = []
 
+    # region Helper methods
     def set_file_names(self, termsFilename, contextsFilename):
         if not ('.txt' in termsFilename and '.txt' in contextsFilename):
             termsFilename += '.txt'
@@ -32,7 +33,6 @@ class LSA(object):
         self.contexts = [self.process_text(context) for context in self.contexts]
         contextsFile.close()
 
-    # region Helper methods
     def get_terms(self):
         return self.terms
 
@@ -43,20 +43,8 @@ class LSA(object):
         context = self.process_text(context)
         self.contexts.append(context)
 
-    def load_raw_data_for_LSA(self, raw_data_filename, target_filename):
-        raw_data_filename = raw_data_filename if '.txt' in raw_data_filename else raw_data_filename + '.txt'
-        target_filename = target_filename if '.txt' in target_filename else target_filename + '.txt'
-
-        raw_data_file = open(raw_data_filename, 'r')
-        target_file = open(target_filename, 'w')
-        for line in raw_data_file:
-            try:
-                tweet = json.loads(line)
-                target_file.write(self.process_text(tweet['text']) + '\n')
-            except:
-                continue
-        target_file.close()
-        raw_data_file.close()
+    def remove_new_context_to_analyze(self):
+        self.contexts.remove(self.contexts[-1])
 
     def process_text(self, text):
         #remove links
@@ -64,7 +52,8 @@ class LSA(object):
             pattern = URL_REGEX
             pattern_obj = re.compile(pattern=pattern, flags=re.MULTILINE)
             text = pattern_obj.sub('', text)
-        except:pass
+        except Exception as ex:
+            print(ex.args)
 
         #remove symbols
         text = text.replace(',', ' ') \
@@ -75,6 +64,7 @@ class LSA(object):
             .replace('?', ' ') \
             .replace('\n',' ')\
             .replace("'", '')\
+            .replace('"', '')\
             .replace('#', '')\
             .replace('@', '')\
             .replace('&gt;', '')\
@@ -96,7 +86,7 @@ class LSA(object):
     #LSA itself
     def apply_LSA(self, preserve_var_percentage, min_cos_value):
         if len(self.terms) == 0 or len(self.contexts) == 0:
-            raise Exception()
+            raise Exception('terms or contexts empty')
 
         # region Helpers
         def get_reduced_dim(S, percentage):
@@ -130,7 +120,7 @@ class LSA(object):
 
         def cos(u, v):
             if not (type(u) == type(v) == np.matrixlib.defmatrix.matrix):
-                raise Exception()
+                raise Exception('u v not vectors')
 
             norm_u = np.sqrt(u.T * u)
             norm_v = np.sqrt(v.T * v)
@@ -145,15 +135,15 @@ class LSA(object):
                 if rel != v1:
                     try:
                         if v1 - 2 < 0:
-                            raise Exception()
+                            raise Exception('unknown exception in get_min_cos')
                         cos_s.append(rel_matr[v1 - 2][rel - 1])
                     except:
                         if rel - 2 < 0:
-                            raise Exception()
+                            raise Exception('unknown exception in get_min_cos')
                         cos_s.append(rel_matr[rel - 2][v1 - 1])
             return min(cos_s)
 
-        def clusterize(rel_matr, contexts_count, min_cos):
+        def clusterize(rel_matr, contexts_count, min_cos_value):
             all_relations = []
             contexts_range = [i + 1 for i in range(1, contexts_count)]
 
@@ -161,7 +151,7 @@ class LSA(object):
                                  all_relations=all_relations,
                                  contexts_range=contexts_range,
                                  vector_index=1,
-                                 min_cos=min_cos
+                                 min_cos_value=min_cos_value
                                  )
             clusters = inner_split(all_relations, rel_matr)
 
@@ -171,11 +161,11 @@ class LSA(object):
                                  all_relations,
                                  contexts_range,
                                  vector_index,
-                                 min_cos
+                                 min_cos_value
                                  ):
             rels = [vector_index]
             for i in range(len(rel_matr) - vector_index + 1):
-                if rel_matr[i + vector_index - 1][vector_index - 1] > min_cos:
+                if rel_matr[i + vector_index - 1][vector_index - 1] > min_cos_value:
                     rels.append(i + vector_index + 1)
 
             all_relations.append(rels)
@@ -193,13 +183,14 @@ class LSA(object):
                                      all_relations=all_relations,
                                      contexts_range=contexts_range,
                                      vector_index=least_range[0],
-                                     min_cos=min_cos
+                                     min_cos_value=min_cos_value
                                      )
 
         # endregion
 
         # fill matrix
         # TODO: implement entropy instead of log
+        self.M = []
         for i in range(len(self.terms)):
             self.M.append([])
             for j in range(len(self.contexts)):
@@ -225,43 +216,77 @@ class LSA(object):
 
         return clusters
 
- #################################
- ## to use perform following steps
- ##1) create obj
- ##2) set_file_names to read terms and contexts
- ##3) add new context to analyze
- ##4) apply LSA
- ##5) print contexts by clusters
- #################################
+    #working with raw_data in json format
+    def apply_LSA_on_raw_data(self, raw_data_filename, target_filename, preserve_var_percentage, min_cos_value):
+        raw_data_filename = raw_data_filename if '.txt' in raw_data_filename else raw_data_filename + '.txt'
+        target_filename = target_filename if '.txt' in target_filename else target_filename + '.txt'
+
+        raw_data_file = open(raw_data_filename, 'r')
+        raw_data_text = raw_data_file.read()
+        raw_data_lines = raw_data_text.split('\n')
+
+        target_file = open(target_filename, 'w')
+        for line in raw_data_lines:
+            try:
+                tweet = json.loads(line)
+                tweet_text = self.process_text(tweet['text'])
+
+                #perform analysis
+                if len(self.terms) > 0 and len(self.contexts) > 0:
+                    self.add_new_context_to_analyze(tweet_text)
+
+                    contexts = self.get_contexts()
+
+                    clusters = self.apply_LSA(preserve_var_percentage=preserve_var_percentage,
+                                                min_cos_value=min_cos_value)
+                    for cluster in clusters:
+                        #define cluster of last context his index is len(contexts) (the new one)
+                        new_context_index = len(contexts)
+                        if new_context_index in cluster:
+                            cluster.remove(new_context_index)
+                            json_str = '{"cluster":'+str(cluster)+',"context":"'+tweet_text+'"}'
+                            target_file.write(json_str + '\n')
+                            break
+
+                    self.remove_new_context_to_analyze()
+                else:
+                    raise Exception('Error in analysis apply_LSA_to_raw_data')
+            except Exception as ex:
+                print(ex.args)
+                continue
+        target_file.close()
+        raw_data_file.close()
+
+#################################
+## to use perform following steps
+##1) create obj
+##2) set_file_names to read terms and contexts
+##3) add new context to analyze
+##4) apply LSA
+##5) print contexts by clusters
+#################################
+
+#region Test area
 print('Test')
 obj = LSA()
 obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
-
-obj.add_new_context_to_analyze('http://www.facebook.comA computer is a programmable machine designed to automatically http://www.facebook.com carry out a sequence of arithmetic or logical operations.http://www.facebook.com')
-
-contexts = obj.get_contexts()
-
-clusters = obj.apply_LSA(preserve_var_percentage=0.20, min_cos_value=0.8)
-
-print('\nThe texts\n')
-for cluster in clusters:
-    for v in cluster:
-        print(contexts[v - 1])
-    print('***************')
-##################################################################################################
-# obj.load_raw_data_for_LSA('raw_data.txt', 'data_for_LSA.txt')
-# obj.set_file_names('track_words.txt', 'data_for_LSA.txt')
-# clusters = obj.apply_LSA(preserve_var_percentage=0.23, min_cos_value=0.8)
+obj.apply_LSA_on_raw_data('raw_data', 'target_result', 0.2, 0.8)
 #
-# terms = obj.get_terms()
 # contexts = obj.get_contexts()
-# for t in terms:
-#     print(t)
-# for c in contexts:
-#     print(c)
 #
+# clusters = obj.apply_LSA(preserve_var_percentage=0.20, min_cos_value=0.8)
+# print(clusters)
+# print(len(clusters))
+#
+# for cluster in clusters:
+#     #print cluster of last context (the new one)
+#     if len(contexts) in cluster:
+#         for context_index in cluster:
+#             print(contexts[context_index-1])
+
 # print('\nThe texts\n')
 # for cluster in clusters:
 #     for v in cluster:
 #         print(contexts[v - 1])
 #     print('***************')
+#endregion

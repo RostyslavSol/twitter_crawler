@@ -1,0 +1,4 @@
+{"cluster":[1, 2, 3, 4, 5],"context":"rt jimmyist  a computer is a programmable machine designed to automatically carry out a sequence of arithmetic or logical operations  "}
+{"cluster":[1, 2, 3, 4, 5],"context":"the first use of the word computer was recorded in 1613  referring to a person who carried out calculations  or computations  and the word continued with the same meaning until the middle of the 20th century  "}
+{"cluster":[],"context":"rt lkrs4life702  in the beginning  computers were as big as a large room  "}
+{"cluster":[],"context":"rt lilyachty  later developers created new applications to help users perform many things from word processing to image editing  "}
