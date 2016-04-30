@@ -4,6 +4,7 @@ import json
 
 #region constants
 URL_REGEX = r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))'''
+EPS = 1e-16
 #endregion
 
 class LSA(object):
@@ -22,11 +23,13 @@ class LSA(object):
         termsFile = open(termsFilename, 'r')
         text = termsFile.read()
         self.terms = text.split('\n')
+        self.terms = [term.lower() for term in self.terms]
         termsFile.close()
 
         contextsFile = open(contextsFilename, 'r')
         text = contextsFile.read()
         self.contexts = text.split('\n')
+        self.contexts = [self.process_text(context) for context in self.contexts]
         contextsFile.close()
 
     # region Helper methods
@@ -36,7 +39,14 @@ class LSA(object):
     def get_contexts(self):
         return self.contexts
 
+    def add_new_context_to_analyze(self, context):
+        context = self.process_text(context)
+        self.contexts.append(context)
+
     def load_raw_data_for_LSA(self, raw_data_filename, target_filename):
+        raw_data_filename = raw_data_filename if '.txt' in raw_data_filename else raw_data_filename + '.txt'
+        target_filename = target_filename if '.txt' in target_filename else target_filename + '.txt'
+
         raw_data_file = open(raw_data_filename, 'r')
         target_file = open(target_filename, 'w')
         for line in raw_data_file:
@@ -121,7 +131,13 @@ class LSA(object):
         def cos(u, v):
             if not (type(u) == type(v) == np.matrixlib.defmatrix.matrix):
                 raise Exception()
-            return (u.T * v) / (np.sqrt(u.T * u) * np.sqrt(v.T * v))
+
+            norm_u = np.sqrt(u.T * u)
+            norm_v = np.sqrt(v.T * v)
+            if norm_u > EPS and norm_v > EPS:
+                return (u.T * v) / (norm_u * norm_v)
+            else:
+                return 0
 
         def get_min_cos(v1, rels, rel_matr):
             cos_s = []
@@ -209,27 +225,43 @@ class LSA(object):
 
         return clusters
 
-
+ #################################
+ ## to use perform following steps
+ ##1) create obj
+ ##2) set_file_names to read terms and contexts
+ ##3) add new context to analyze
+ ##4) apply LSA
+ ##5) print contexts by clusters
+ #################################
 print('Test')
 obj = LSA()
-# obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
+obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
+
+obj.add_new_context_to_analyze('http://www.facebook.comA computer is a programmable machine designed to automatically http://www.facebook.com carry out a sequence of arithmetic or logical operations.http://www.facebook.com')
+
+contexts = obj.get_contexts()
+
+clusters = obj.apply_LSA(preserve_var_percentage=0.20, min_cos_value=0.8)
+
+print('\nThe texts\n')
+for cluster in clusters:
+    for v in cluster:
+        print(contexts[v - 1])
+    print('***************')
+##################################################################################################
+# obj.load_raw_data_for_LSA('raw_data.txt', 'data_for_LSA.txt')
+# obj.set_file_names('track_words.txt', 'data_for_LSA.txt')
+# clusters = obj.apply_LSA(preserve_var_percentage=0.23, min_cos_value=0.8)
 #
 # terms = obj.get_terms()
 # contexts = obj.get_contexts()
-#
-# clusters = obj.apply_LSA(preserve_var_percentage=0.23, min_cos_value=0.8)
+# for t in terms:
+#     print(t)
+# for c in contexts:
+#     print(c)
 #
 # print('\nThe texts\n')
 # for cluster in clusters:
 #     for v in cluster:
 #         print(contexts[v - 1])
 #     print('***************')
-obj.load_raw_data_for_LSA('raw_data.txt', 'data_for_LSA.txt')
-obj.set_file_names('track_words.txt', 'data_for_LSA.txt')
-clusters = obj.apply_LSA(preserve_var_percentage=0.23, min_cos_value=0.8)
-contexts = obj.get_contexts()
-print('\nThe texts\n')
-for cluster in clusters:
-    for v in cluster:
-        print(contexts[v - 1])
-    print('***************')
