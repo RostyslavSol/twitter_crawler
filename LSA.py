@@ -39,6 +39,13 @@ class LSA(object):
     def get_contexts(self):
         return self.contexts
 
+    def get_context_vector(self, context):
+        if len(self.M) == 0 or len(self.contexts) == 0:
+            raise Exception('Empty matrix M')
+        vector = np.mat(self.M)[:,self.contexts.index(context)].T.tolist()[0]
+        vector = [int(-1 + np.exp(v)) for v in vector]
+        return vector
+
     def add_new_context_to_analyze(self, context):
         context = self.process_text(context)
         self.contexts.append(context)
@@ -239,12 +246,22 @@ class LSA(object):
 
                     clusters = self.apply_LSA(preserve_var_percentage=preserve_var_percentage,
                                                 min_cos_value=min_cos_value)
+                    #define cluster of last context his index is len(contexts) (the new one)
+                    new_context_index = len(contexts)
+                    vector = self.get_context_vector(contexts[-1])
+
                     for cluster in clusters:
-                        #define cluster of last context his index is len(contexts) (the new one)
-                        new_context_index = len(contexts)
                         if new_context_index in cluster:
                             cluster.remove(new_context_index)
-                            json_str = '{"cluster":'+str(cluster)+',"context":"'+tweet_text+'"}'
+
+                            json_str = '{"cluster_index":'+\
+                                       str(clusters.index(cluster))+\
+                                       ',"cluster":'+\
+                                       str(cluster)+\
+                                       ',"context":"'+\
+                                       tweet_text+\
+                                       '","context_vector":'+\
+                                       str(vector)+'}'
                             target_file.write(json_str + '\n')
                             break
 
