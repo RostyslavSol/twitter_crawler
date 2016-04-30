@@ -1,6 +1,10 @@
 import numpy as np
+import re
 import json
 
+#region constants
+URL_REGEX = r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))'''
+#endregion
 
 class LSA(object):
     # read terms and contexts
@@ -47,11 +51,12 @@ class LSA(object):
     def process_text(self, text):
         #remove links
         try:
-            if text.index('https') > 0:
-                str_to_remove = text[text.index('https'):]
-                text = text.replace(str_to_remove, '')
+            pattern = URL_REGEX
+            pattern_obj = re.compile(pattern=pattern, flags=re.MULTILINE)
+            text = pattern_obj.sub('', text)
         except:pass
 
+        #remove symbols
         text = text.replace(',', ' ') \
             .replace('.', ' ') \
             .replace(':', ' ') \
@@ -62,6 +67,8 @@ class LSA(object):
             .replace("'", '')\
             .replace('#', '')\
             .replace('@', '')\
+            .replace('&gt;', '')\
+            .replace('&amp;', '')\
             .lower()
 
         return text
