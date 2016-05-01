@@ -3,49 +3,91 @@ import json
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
+from LSA import LSA
 
-# constants
+#region constants
 ACCESS_TOKEN = "2291093965-a08Vm2RWf7IU45tMz44Nmwb4cc4bxztHmpujqVm"
 ACCESS_TOKEN_SECRET = "Ajts6p6lPDSgIoEsUM8outlHQpdH6OWqPgsW6pRCPvnwT"
 
 API_KEY = "JmiG2HI5OyK2mhMQxne7O7W1J"
 API_SECRET = "keBkKDdhkjn2BbG6JJLkTu10wszh4qpSP7pOjDTTeNGOxKc7m7"
+#endregion
 
-class StdOutListener(StreamListener):
-    def __init__(self, filename, tweets_count):
-        filename = filename if '.txt' in filename else filename + '.txt'
-        self.outFile = open(filename, 'w')
+#############################
+# requires
+# 1) terms_filename + contexts_filename
+# 3) log_filename
+# 4) preserve_var_percentage
+# 5) min_cos_value
+#############################
+class CustomListener(StreamListener):
+    def __init__(self, terms_filename,
+                        contexts_filename,
+                        log_filename,
+                        preserve_var_percentage,
+                        min_cos_val,
+                        tweets_count):
+        terms_filename = terms_filename if '.txt' in terms_filename else terms_filename + '.txt'
+        contexts_filename = contexts_filename if '.txt' in contexts_filename else contexts_filename + '.txt'
+
+        #use LSA
+        self.lsa_obj = LSA()
+        self.lsa_obj.set_file_names(terms_filename=terms_filename,contexts_filename=contexts_filename)
+        #set pars
+        self.lsa_log_filename = log_filename
+        self.lsa_var_percentage = preserve_var_percentage
+        self.lsa_min_cos_val = min_cos_val
+
+        #stop crawling
         self.tweets_count = tweets_count
         self.tweets_index = 0
 
     def on_data(self, raw_data):
         #parse json
-        tweet = json.loads(raw_data)
+        tweet_json = json.loads(raw_data)
+        tweet_processed = None
         try:
-            write_json = json.dumps({
-                                     "user_id": str(tweet['user']['id']),
-                                     "text": tweet['text'],
-                                     "lang": tweet['lang']
-                                     })
+            #classify tweet with LSA
+            tweet_processed_str = self.lsa_obj.apply_LSA_on_raw_data(log_file_name=self.lsa_log_filename,
+                                                                    tweet_json=tweet_json,
+                                                                    preserve_var_percentage=self.lsa_var_percentage,
+                                                                    min_cos_value=self.lsa_min_cos_val)
+            tweet_processed = json.loads(tweet_processed_str)
         except:pass
 
-        #write to file
-        self.outFile.write(write_json + '\n')
+        ################################
+        contexts = self.lsa_obj.get_contexts()
+        if len(tweet_processed['cluster']) > 0:
+            for i in tweet_processed['cluster']:
+                print(contexts[i-1])
+        print(tweet_processed['context'])
+        print('************************')
+        ################################
 
         #cycle condition
         self.tweets_index += 1
         if self.tweets_index >= self.tweets_count:
-            self.outFile.close()
             return False
         else:
             return True
 
     def on_error(self, status_code):
-        self.outFile.write(str(status_code))
+        print(str(status_code))
 
 class TwitterCrawler(object):
-    def __init__(self, filename, tweets_count):
-        listnr = StdOutListener(filename, tweets_count)
+    def __init__(self, terms_filename,
+                        contexts_filename,
+                        log_filename,
+                        preserve_var_percentage,
+                        min_cos_val,
+                        tweets_count):
+
+        listnr = CustomListener(terms_filename,
+                                contexts_filename,
+                                log_filename,
+                                preserve_var_percentage,
+                                min_cos_val,
+                                tweets_count)
         auth = OAuthHandler(API_KEY, API_SECRET)
         auth.set_access_token(ACCESS_TOKEN,ACCESS_TOKEN_SECRET)
         self.stream = Stream(auth, listnr)
@@ -56,8 +98,5 @@ class TwitterCrawler(object):
                            follow=follows,
                            locations=locations)
 
-# track=['Champions League','Bayern','Real Madrid', 'Barcelona', 'Chelsea', 'Arsenal', 'Roma'],
-#           languages=['en'],)
-# obj = TwitterCrawler('D:/somefile', 5)
-# obj.filter_by_params(words=['Champions League','Bayern','Real Madrid', 'Barcelona', 'Chelsea', 'Arsenal', 'Roma'],
-#                       langs=['en'])
+crawler = TwitterCrawler('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts','log.txt',0.2,0.8,10)
+crawler.filter_by_params(['computer','user','system','trees','binary','graph'],['en'])

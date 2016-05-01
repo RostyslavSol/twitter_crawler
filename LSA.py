@@ -16,22 +16,22 @@ class LSA(object):
         self.M = []
 
     # region Helper methods
-    def set_file_names(self, termsFilename, contextsFilename):
-        if not ('.txt' in termsFilename and '.txt' in contextsFilename):
-            termsFilename += '.txt'
-            contextsFilename += '.txt'
+    def set_file_names(self, terms_filename, contexts_filename):
+        if not ('.txt' in terms_filename and '.txt' in contexts_filename):
+            terms_filename += '.txt'
+            contexts_filename += '.txt'
 
-        termsFile = open(termsFilename, 'r')
-        text = termsFile.read()
+        terms_file = open(terms_filename, 'r')
+        text = terms_file.read()
         self.terms = text.split('\n')
         self.terms = [term.lower() for term in self.terms]
-        termsFile.close()
+        terms_file.close()
 
-        contextsFile = open(contextsFilename, 'r')
-        text = contextsFile.read()
+        contexts_file = open(contexts_filename, 'r')
+        text = contexts_file.read()
         self.contexts = text.split('\n')
         self.contexts = [self.process_text(context) for context in self.contexts]
-        contextsFile.close()
+        contexts_file.close()
 
     def get_terms(self):
         return self.terms
@@ -215,7 +215,7 @@ class LSA(object):
             rel_matr.append([])
             for j in range(0, i):
                 rel_matr[i - 1].append(float(cos(svd_reconstruction[:, i], svd_reconstruction[:, j])))
-            print(rel_matr[i - 1])
+            #print(rel_matr[i - 1])
         self.rel_matr = rel_matr
 
         # clusterize contexts
@@ -224,55 +224,52 @@ class LSA(object):
         return clusters
 
     #working with raw_data in json format
-    def apply_LSA_on_raw_data(self, raw_data_filename, target_filename, preserve_var_percentage, min_cos_value):
-        raw_data_filename = raw_data_filename if '.txt' in raw_data_filename else raw_data_filename + '.txt'
-        target_filename = target_filename if '.txt' in target_filename else target_filename + '.txt'
+    def apply_LSA_on_raw_data(self, log_file_name, tweet_json, preserve_var_percentage, min_cos_value):
+        log_file_name = log_file_name if '.txt' in log_file_name else log_file_name + '.txt'
+        log_file = open(log_file_name, 'a')
+        json_str = None
+        try:
+            #remove characters and lowercase the text
+            tweet_text = self.process_text(tweet_json['text'])
 
-        raw_data_file = open(raw_data_filename, 'r')
-        raw_data_text = raw_data_file.read()
-        raw_data_lines = raw_data_text.split('\n')
+            #perform analysis
+            if len(self.terms) > 0 and len(self.contexts) > 0:
+                #add new context
+                self.add_new_context_to_analyze(tweet_text)
 
-        target_file = open(target_filename, 'w')
-        for line in raw_data_lines:
-            try:
-                tweet = json.loads(line)
-                tweet_text = self.process_text(tweet['text'])
+                contexts = self.get_contexts()
 
-                #perform analysis
-                if len(self.terms) > 0 and len(self.contexts) > 0:
-                    self.add_new_context_to_analyze(tweet_text)
+                clusters = self.apply_LSA(preserve_var_percentage=preserve_var_percentage,
+                                            min_cos_value=min_cos_value)
+                #define cluster of last context his index is len(contexts) (the new one)
+                new_context_index = len(contexts)
+                vector = self.get_context_vector(contexts[-1])
 
-                    contexts = self.get_contexts()
+                for cluster in clusters:
+                    if new_context_index in cluster:
+                        cluster.remove(new_context_index)
 
-                    clusters = self.apply_LSA(preserve_var_percentage=preserve_var_percentage,
-                                                min_cos_value=min_cos_value)
-                    #define cluster of last context his index is len(contexts) (the new one)
-                    new_context_index = len(contexts)
-                    vector = self.get_context_vector(contexts[-1])
+                        #write to log file
+                        json_str = '{"cluster_index":'+\
+                                   str(clusters.index(cluster))+\
+                                   ',"cluster":'+\
+                                   str(cluster)+\
+                                   ',"context":"'+\
+                                   tweet_text+\
+                                   '","context_vector":'+\
+                                   str(vector)+'}'
+                        log_file.write(json_str + '\n')
+                        break
 
-                    for cluster in clusters:
-                        if new_context_index in cluster:
-                            cluster.remove(new_context_index)
+                #remove new context
+                self.remove_new_context_to_analyze()
+            else:
+                raise Exception('Empty terms or contexts apply_LSA_to_raw_data')
+        except Exception as ex:
+            print(ex.args)
 
-                            json_str = '{"cluster_index":'+\
-                                       str(clusters.index(cluster))+\
-                                       ',"cluster":'+\
-                                       str(cluster)+\
-                                       ',"context":"'+\
-                                       tweet_text+\
-                                       '","context_vector":'+\
-                                       str(vector)+'}'
-                            target_file.write(json_str + '\n')
-                            break
-
-                    self.remove_new_context_to_analyze()
-                else:
-                    raise Exception('Error in analysis apply_LSA_to_raw_data')
-            except Exception as ex:
-                print(ex.args)
-                continue
-        target_file.close()
-        raw_data_file.close()
+        log_file.close()
+        return json_str
 
 #################################
 ## to use perform following steps
@@ -284,27 +281,8 @@ class LSA(object):
 #################################
 
 #region Test area
-print('Test')
-obj = LSA()
-#obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
-obj.set_file_names('D:/key_words.txt', 'D:/bball_contexts.txt')
-obj.apply_LSA_on_raw_data('raw_bball', 'target_result', 0.2, 0.8)
-#
-# contexts = obj.get_contexts()
-#
-# clusters = obj.apply_LSA(preserve_var_percentage=0.20, min_cos_value=0.8)
-# print(clusters)
-# print(len(clusters))
-#
-# for cluster in clusters:
-#     #print cluster of last context (the new one)
-#     if len(contexts) in cluster:
-#         for context_index in cluster:
-#             print(contexts[context_index-1])
-
-# print('\nThe texts\n')
-# for cluster in clusters:
-#     for v in cluster:
-#         print(contexts[v - 1])
-#     print('***************')
-#endregion
+# print('Test')
+# obj = LSA()
+# #obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
+# obj.set_file_names('D:/key_words.txt', 'D:/bball_contexts.txt')
+# obj.apply_LSA_on_raw_data('raw_bball', 'target_result', 0.2, 0.8)
