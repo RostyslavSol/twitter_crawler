@@ -286,8 +286,9 @@ class LSA(object):
 #region Test area
 print('Test')
 obj = LSA()
-obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
-obj.apply_LSA_on_raw_data('raw_data', 'target_result', 0.2, 0.8)
+#obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
+obj.set_file_names('D:/key_words.txt', 'D:/bball_contexts.txt')
+obj.apply_LSA_on_raw_data('raw_bball', 'target_result', 0.2, 0.8)
 #
 # contexts = obj.get_contexts()
 #

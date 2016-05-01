@@ -9,17 +9,27 @@ class HelperForNB(object):
         text = json_sample_file.read()
 
         self.json_sample = text.split('\n')
-        self.json_sample.remove('')
+        #self.json_sample.remove('')
 
         #parse json and form X & Y
-        X = []
-        Y = []
+        self.X = []
+        self.Y = []
         for json_str in self.json_sample:
-            json_obj = json.loads(json_str)
-            if len(json_obj['cluster']) > 0:
-                X.append(json_obj['context_vector'])
-                Y.append(json_obj['cluster_index'])
+            try:
+                json_obj = json.loads(json_str)
+                if len(json_obj['cluster']) > 0:
+                    self.X.append(json_obj['context_vector'])
+                    self.Y.append(json_obj['cluster_index'])
+            except:
+                continue
 
+    def get_X(self):
+        return self.X if len(self.X) > 0 else None
+
+    def get_Y(self):
+        return self.Y if len(self.Y) > 0 else None
+
+    def fit_direct(self, X, Y):
         #train classifier
         self.classifier = MultinomialNB()
         self.classifier.fit(X, Y)
@@ -28,4 +38,7 @@ class HelperForNB(object):
         return self.classifier.predict(huge_sample)
 
 obj = HelperForNB('target_result')
-print(obj.predict_with_NB([[0,0,1,0,0,0,0,0,0,0,0,0]]))
+X, Y = obj.get_X(), obj.get_Y()
+obj.fit_direct(X[0:80], Y[0:80])
+#print(obj.predict_with_NB([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]]))
+print(obj.predict_with_NB(X))

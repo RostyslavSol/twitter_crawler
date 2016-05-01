@@ -25,7 +25,7 @@
         <entry file="file://$PROJECT_DIR$/crawler_ui.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="341" column="66" selection-start-line="341" selection-start-column="66" selection-end-line="341" selection-end-column="66" />
+              <caret line="353" column="44" selection-start-line="353" selection-start-column="44" selection-end-line="353" selection-end-column="44" />
               <folding>
                 <element signature="e#167#8452#0" expanded="false" />
                 <element signature="e#195#578#0" expanded="false" />
@@ -57,30 +57,30 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LSA.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LSA.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LSA.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5042254">
-              <caret line="191" column="48" selection-start-line="191" selection-start-column="48" selection-end-line="191" selection-end-column="48" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="292" column="31" selection-start-line="292" selection-start-column="31" selection-end-line="292" selection-end-column="31" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#548#1127#0" expanded="false" />
                 <element signature="e#1162#1179#0" expanded="false" />
                 <element signature="e#1217#1237#0" expanded="false" />
-                <element signature="e#1298#1372#0" expanded="false" />
-                <element signature="e#1427#1466#0" expanded="false" />
-                <element signature="e#2299#2492#0" expanded="false" />
+                <element signature="e#8366#10566#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="linalg.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/numpy/linalg/linalg.py">
+      <file leaf-file-name="custom_naive_bayes.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/custom_naive_bayes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="1304" column="0" selection-start-line="1304" selection-start-column="0" selection-end-line="1304" selection-end-column="0" />
-              <folding />
+            <state vertical-scroll-proportion="1.8197184">
+              <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#45#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -116,6 +116,7 @@
         <option value="$PROJECT_DIR$/crawler_ui.py" />
         <option value="$PROJECT_DIR$/analyzer.py" />
         <option value="$PROJECT_DIR$/LSA.py" />
+        <option value="$PROJECT_DIR$/custom_naive_bayes.py" />
       </list>
     </option>
   </component>
@@ -136,7 +137,7 @@
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
       <showMembers />
       <showModules />
@@ -149,9 +150,32 @@
       <manualOrder />
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bachelor_twitter_crawler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bachelor_twitter_crawler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="bachelor_twitter_crawler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+    </panes>
   </component>
-  <component name="RunManager" selected="Python.LSA">
+  <component name="RunManager" selected="Python.custom_naive_bayes">
     <configuration default="false" name="crawler_ui" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -199,6 +223,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="bachelor_twitter_crawler" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/LSA.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="custom_naive_bayes" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="bachelor_twitter_crawler" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/custom_naive_bayes.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -325,16 +366,18 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="3">
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Python.crawler_ui" />
       <item index="1" class="java.lang.String" itemvalue="Python.crawler" />
       <item index="2" class="java.lang.String" itemvalue="Python.LSA" />
+      <item index="3" class="java.lang.String" itemvalue="Python.custom_naive_bayes" />
     </list>
     <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python.LSA" />
-        <item index="1" class="java.lang.String" itemvalue="Python.crawler_ui" />
-        <item index="2" class="java.lang.String" itemvalue="Python.crawler" />
+      <list size="4">
+        <item index="0" class="java.lang.String" itemvalue="Python.custom_naive_bayes" />
+        <item index="1" class="java.lang.String" itemvalue="Python.LSA" />
+        <item index="2" class="java.lang.String" itemvalue="Python.crawler_ui" />
+        <item index="3" class="java.lang.String" itemvalue="Python.crawler" />
       </list>
     </recent_temporary>
   </component>
@@ -364,12 +407,12 @@
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24974093" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32733223" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32569557" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3289689" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37315875" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.37315875" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3289689" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -432,31 +475,16 @@
           <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/LSA.py</url>
-          <line>228</line>
-          <option name="timeStamp" value="62" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/LSA.py</url>
-          <line>272</line>
-          <option name="timeStamp" value="64" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/LSA.py</url>
-          <line>200</line>
-          <option name="timeStamp" value="66" />
+          <url>file://$PROJECT_DIR$/custom_naive_bayes.py</url>
+          <line>41</line>
+          <option name="timeStamp" value="69" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="67" />
+      <option name="time" value="70" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="line" language="Python" />
-        <watch expression="len(self.contexts)" language="Python" />
-        <watch expression="clusters" language="Python" />
-        <watch expression="json_str" language="Python" />
-        <watch expression="line" language="Python" />
-        <watch expression="np.linalg.svd(M)" language="Python" />
+        <watch expression="self.json_sample[-1]" language="Python" />
       </configuration>
     </watches-manager>
   </component>
@@ -496,15 +524,23 @@
     <entry file="file://$PROJECT_DIR$/LSA.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="168" column="30" selection-start-line="168" selection-start-column="30" selection-end-line="168" selection-end-column="30" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#548#1127#0" expanded="false" />
             <element signature="e#1162#1179#0" expanded="false" />
             <element signature="e#1217#1237#0" expanded="false" />
-            <element signature="e#1298#1372#0" expanded="false" />
-            <element signature="e#1427#1466#0" expanded="false" />
-            <element signature="e#2299#2492#0" expanded="false" />
+            <element signature="e#8366#10566#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/custom_naive_bayes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -560,9 +596,126 @@
             <element signature="e#548#1127#0" expanded="false" />
             <element signature="e#1162#1179#0" expanded="false" />
             <element signature="e#1217#1237#0" expanded="false" />
-            <element signature="e#1298#1372#0" expanded="false" />
-            <element signature="e#1427#1466#0" expanded="false" />
-            <element signature="e#2299#2492#0" expanded="false" />
+            <element signature="e#8366#10566#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/site-packages/numpy/linalg/linalg.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="1304" column="0" selection-start-line="1304" selection-start-column="0" selection-end-line="1304" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crawler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="42" selection-start-line="32" selection-start-column="41" selection-end-line="32" selection-end-column="42" />
+          <folding>
+            <element signature="e#24#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crawler_ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="341" column="66" selection-start-line="341" selection-start-column="66" selection-end-line="341" selection-end-column="66" />
+          <folding>
+            <element signature="e#167#8452#0" expanded="false" />
+            <element signature="e#195#578#0" expanded="false" />
+            <element signature="e#708#4109#0" expanded="false" />
+            <element signature="e#4268#4402#0" expanded="false" />
+            <element signature="e#4450#4579#0" expanded="false" />
+            <element signature="e#4629#4760#0" expanded="false" />
+            <element signature="e#4812#4945#0" expanded="false" />
+            <element signature="e#5109#5479#0" expanded="false" />
+            <element signature="e#5518#5880#0" expanded="false" />
+            <element signature="e#5928#6318#0" expanded="false" />
+            <element signature="e#6361#6745#0" expanded="false" />
+            <element signature="e#8552#8989#0" expanded="false" />
+            <element signature="e#11982#12111#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/analyzer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="24" selection-start-line="27" selection-start-column="8" selection-end-line="32" selection-end-column="24" />
+          <folding>
+            <element signature="e#232#243#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LSA.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#548#1127#0" expanded="false" />
+            <element signature="e#1162#1179#0" expanded="false" />
+            <element signature="e#1217#1237#0" expanded="false" />
+            <element signature="e#8366#10566#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crawler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="42" selection-start-line="32" selection-start-column="41" selection-end-line="32" selection-end-column="42" />
+          <folding>
+            <element signature="e#24#35#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crawler_ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="341" column="66" selection-start-line="341" selection-start-column="66" selection-end-line="341" selection-end-column="66" />
+          <folding>
+            <element signature="e#167#8452#0" expanded="false" />
+            <element signature="e#195#578#0" expanded="false" />
+            <element signature="e#708#4109#0" expanded="false" />
+            <element signature="e#4268#4402#0" expanded="false" />
+            <element signature="e#4450#4579#0" expanded="false" />
+            <element signature="e#4629#4760#0" expanded="false" />
+            <element signature="e#4812#4945#0" expanded="false" />
+            <element signature="e#5109#5479#0" expanded="false" />
+            <element signature="e#5518#5880#0" expanded="false" />
+            <element signature="e#5928#6318#0" expanded="false" />
+            <element signature="e#6361#6745#0" expanded="false" />
+            <element signature="e#8552#8989#0" expanded="false" />
+            <element signature="e#11982#12111#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/analyzer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="24" selection-start-line="27" selection-start-column="8" selection-end-line="32" selection-end-column="24" />
+          <folding>
+            <element signature="e#232#243#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LSA.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#548#1127#0" expanded="false" />
+            <element signature="e#1162#1179#0" expanded="false" />
+            <element signature="e#1217#1237#0" expanded="false" />
+            <element signature="e#8366#10566#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -618,9 +771,7 @@
             <element signature="e#548#1127#0" expanded="false" />
             <element signature="e#1162#1179#0" expanded="false" />
             <element signature="e#1217#1237#0" expanded="false" />
-            <element signature="e#1298#1372#0" expanded="false" />
-            <element signature="e#1427#1466#0" expanded="false" />
-            <element signature="e#2299#2492#0" expanded="false" />
+            <element signature="e#8366#10566#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -683,9 +834,7 @@
             <element signature="e#548#1127#0" expanded="false" />
             <element signature="e#1162#1179#0" expanded="false" />
             <element signature="e#1217#1237#0" expanded="false" />
-            <element signature="e#1298#1372#0" expanded="false" />
-            <element signature="e#1427#1466#0" expanded="false" />
-            <element signature="e#2299#2492#0" expanded="false" />
+            <element signature="e#8366#10566#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -865,28 +1014,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/crawler_ui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="341" column="66" selection-start-line="341" selection-start-column="66" selection-end-line="341" selection-end-column="66" />
-          <folding>
-            <element signature="e#167#8452#0" expanded="false" />
-            <element signature="e#195#578#0" expanded="false" />
-            <element signature="e#708#4109#0" expanded="false" />
-            <element signature="e#4268#4402#0" expanded="false" />
-            <element signature="e#4450#4579#0" expanded="false" />
-            <element signature="e#4629#4760#0" expanded="false" />
-            <element signature="e#4812#4945#0" expanded="false" />
-            <element signature="e#5109#5479#0" expanded="false" />
-            <element signature="e#5518#5880#0" expanded="false" />
-            <element signature="e#5928#6318#0" expanded="false" />
-            <element signature="e#6361#6745#0" expanded="false" />
-            <element signature="e#8552#8989#0" expanded="false" />
-            <element signature="e#11982#12111#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/crawler.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -911,7 +1038,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.17838766">
           <caret line="312" column="0" selection-start-line="312" selection-start-column="0" selection-end-line="312" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -919,7 +1045,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.6730769">
           <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -927,22 +1052,59 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="1304" column="0" selection-start-line="1304" selection-start-column="0" selection-end-line="1304" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/crawler_ui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="353" column="44" selection-start-line="353" selection-start-column="44" selection-end-line="353" selection-end-column="44" />
+          <folding>
+            <element signature="e#167#8452#0" expanded="false" />
+            <element signature="e#195#578#0" expanded="false" />
+            <element signature="e#708#4109#0" expanded="false" />
+            <element signature="e#4268#4402#0" expanded="false" />
+            <element signature="e#4450#4579#0" expanded="false" />
+            <element signature="e#4629#4760#0" expanded="false" />
+            <element signature="e#4812#4945#0" expanded="false" />
+            <element signature="e#5109#5479#0" expanded="false" />
+            <element signature="e#5518#5880#0" expanded="false" />
+            <element signature="e#5928#6318#0" expanded="false" />
+            <element signature="e#6361#6745#0" expanded="false" />
+            <element signature="e#8552#8989#0" expanded="false" />
+            <element signature="e#11982#12111#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Anaconda3/Lib/json/decoder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="360" column="0" selection-start-line="360" selection-start-column="0" selection-end-line="360" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/LSA.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5042254">
-          <caret line="191" column="48" selection-start-line="191" selection-start-column="48" selection-end-line="191" selection-end-column="48" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="292" column="31" selection-start-line="292" selection-start-column="31" selection-end-line="292" selection-end-column="31" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#548#1127#0" expanded="false" />
             <element signature="e#1162#1179#0" expanded="false" />
             <element signature="e#1217#1237#0" expanded="false" />
-            <element signature="e#1298#1372#0" expanded="false" />
-            <element signature="e#1427#1466#0" expanded="false" />
-            <element signature="e#2299#2492#0" expanded="false" />
+            <element signature="e#8366#10566#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/custom_naive_bayes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.8197184">
+          <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
