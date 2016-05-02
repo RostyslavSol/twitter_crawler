@@ -43,6 +43,8 @@ class CustomListener(StreamListener):
         self.lsa_log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
         self.lsa_var_percentage = preserve_var_percentage
         self.lsa_min_cos_val = min_cos_val
+        self.init_clusters = self.lsa_obj.get_init_clusters(preserve_var_percentage, min_cos_val)
+        self.init_contexts = self.lsa_obj.get_contexts()
 
         #stop crawling
         self.tweets_count = tweets_count
@@ -77,13 +79,16 @@ class CustomListener(StreamListener):
 
                 ################################################################
                     contexts = self.lsa_obj.get_contexts()
-                    self.result_str += str(self.training_sample_index) + '\n'
+                    self.result_str += str(self.training_sample_index) + \
+                                       ' cluster #' + \
+                                       str(tweet_processed['cluster_index']) + '\n'
                     for i in tweet_processed['cluster']:
                         self.result_str += contexts[i-1] + '\n'
                     self.result_str += tweet_processed['context'] + \
                         '\n************************\n'
                 ################################################################
-            except:pass
+            except Exception as ex:
+                print(ex.args[0])
         elif not self.NB_trained:
             self.NB_helper.read_sample_file(self.log_filename)
             X, Y = self.NB_helper.create_X_Y()
@@ -147,5 +152,10 @@ class TwitterCrawler(object):
     def get_result_str(self):
         return self.listener.get_result_str()
 
+    def get_init_clusters(self):
+        return self.listener.init_clusters
+
+    def get_init_contexts(self):
+        return self.listener.init_contexts
 # crawler = TwitterCrawler('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts','log.txt',0.2,0.8,20,10)
 # crawler.filter_by_params(['computer','user','system','trees','binary','graph'],['en'])

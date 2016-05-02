@@ -289,6 +289,20 @@ class Window(QtGui.QMainWindow):
                                          tweets_count=self.tweets_count,
                                          training_sample_size=self.training_sample_size
                                          )
+                #######################################################
+                init_clusters = crawler.get_init_clusters()
+                init_contexts = crawler.get_init_contexts()
+                print_string = 'INITIAL CLUSTERS:\n'
+                for i in range(len(init_clusters)):
+                    print_string += str(i) + '\n'
+                    for index_ in init_clusters[i]:
+                        print_string += init_contexts[index_-1] + '\n'
+                    print_string += '******************\n'
+                msg = QtGui.QMessageBox(self)
+                msg.setText(print_string)
+                msg.show()
+                #######################################################
+
                 crawler.filter_by_params(words=tracking_words, langs=langs, follows=follows, locations=locations)
 
                 #visualize resilts
