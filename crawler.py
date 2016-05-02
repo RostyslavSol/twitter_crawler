@@ -126,7 +126,7 @@ class TwitterCrawler(object):
                                 training_sample_size
                                 )
         auth = OAuthHandler(API_KEY, API_SECRET)
-        auth.set_access_token(ACCESS_TOKEN,ACCESS_TOKEN_SECRET)
+        auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
         self.stream = Stream(auth, listnr)
 
     def filter_by_params(self, words=None, langs=None, follows=None, locations=None):
@@ -135,5 +135,5 @@ class TwitterCrawler(object):
                            follow=follows,
                            locations=locations)
 
-crawler = TwitterCrawler('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts','log.txt',0.3,0.8,20,10)
-crawler.filter_by_params(['computer','user','system','trees','binary','graph'],['en'])
+# crawler = TwitterCrawler('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts','log.txt',0.2,0.8,20,10)
+# crawler.filter_by_params(['computer','user','system','trees','binary','graph'],['en'])
