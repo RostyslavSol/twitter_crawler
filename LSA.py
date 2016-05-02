@@ -14,6 +14,7 @@ class LSA(object):
         self.terms = []
         self.contexts = []
         self.M = []
+        self.init_clusters = None
 
     # region Helper methods
     def set_file_names(self, terms_filename, contexts_filename):
@@ -33,6 +34,13 @@ class LSA(object):
         self.contexts = [self.process_text(context) for context in self.contexts]
         contexts_file.close()
 
+    def fill_M(self):
+        self.M = []
+        for i in range(len(self.terms)):
+            self.M.append([])
+            for j in range(len(self.contexts)):
+                self.M[i].append(np.log(1 + self.count_word_in_text(self.terms[i], self.contexts[j])))
+
     def get_terms(self):
         return self.terms
 
@@ -40,9 +48,16 @@ class LSA(object):
         return self.contexts
 
     def get_context_vector(self, context):
-        if len(self.M) == 0 or len(self.contexts) == 0:
-            raise Exception('Empty matrix M')
-        vector = np.mat(self.M)[:,self.contexts.index(context)].T.tolist()[0]
+        if len(self.terms) == 0 or len(self.contexts) == 0:
+            raise Exception('Error: empty terms or contexts')
+        context_vector = []
+        for i in range(len(self.terms)):
+            context_vector.append(self.count_word_in_text(self.terms[i], context))
+
+        return context_vector
+
+
+        vector = np.mat(self.M)[:, self.contexts.index(context)].T.tolist()[0]
         vector = [int(-1 + np.exp(v)) for v in vector]
         return vector
 
@@ -88,6 +103,11 @@ class LSA(object):
 
             count = text.split().count(word)
         return count
+
+    def get_init_clusters(self, preserve_var_percentage, min_cos_value):
+        if self.init_clusters is None:
+            self.init_clusters = self.apply_LSA(preserve_var_percentage, min_cos_value)
+        return self.init_clusters
     # endregion
 
     #LSA itself
@@ -196,12 +216,7 @@ class LSA(object):
         # endregion
 
         # fill matrix
-        # TODO: implement entropy instead of log
-        self.M = []
-        for i in range(len(self.terms)):
-            self.M.append([])
-            for j in range(len(self.contexts)):
-                self.M[i].append(np.log(1 + self.count_word_in_text(self.terms[i], self.contexts[j])))
+        self.fill_M()
 
         # SVD decomposition
         M = np.mat(self.M)
@@ -226,7 +241,7 @@ class LSA(object):
     #working with raw_data in json format
     def apply_LSA_on_raw_data(self, log_file_name, tweet_json, preserve_var_percentage, min_cos_value):
         log_file_name = log_file_name if '.txt' in log_file_name else log_file_name + '.txt'
-        log_file = open(log_file_name, 'a')
+        log_file = open(log_file_name, 'a+')
         json_str = None
         try:
             #remove characters and lowercase the text
@@ -259,7 +274,6 @@ class LSA(object):
                                    '","context_vector":'+\
                                    str(vector)+'}'
                         log_file.write(json_str + '\n')
-                        break
 
                 #remove new context
                 self.remove_new_context_to_analyze()
