@@ -57,6 +57,7 @@ class Window(QtGui.QMainWindow):
         self.txtTweetsCount.setText('')
         self.txtMinCos.setText('')
         self.txtVarPercent.setText('')
+        self.richTxt.setText('')
 
     #region Layouts
     def default_layout(self):
@@ -289,6 +290,9 @@ class Window(QtGui.QMainWindow):
                                          training_sample_size=self.training_sample_size
                                          )
                 crawler.filter_by_params(words=tracking_words, langs=langs, follows=follows, locations=locations)
+
+                #visualize resilts
+                self.richTxt.setText(crawler.get_result_str())
             except Exception as ex:
                 msg = QtGui.QMessageBox(self)
                 msg.setText(ex.args[0])

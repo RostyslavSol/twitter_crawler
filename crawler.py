@@ -20,6 +20,8 @@ API_SECRET = "keBkKDdhkjn2BbG6JJLkTu10wszh4qpSP7pOjDTTeNGOxKc7m7"
 # 3) log_filename
 # 4) preserve_var_percentage
 # 5) min_cos_value
+# 6) tweets_count
+# 7) training_sample_size
 #############################
 class CustomListener(StreamListener):
     def __init__(self, terms_filename,
@@ -52,6 +54,12 @@ class CustomListener(StreamListener):
         self.NB_helper = HelperForNB()
         self.NB_trained = False
 
+        #result
+        self.result_str = '\nCLASSIFICATION BY LSA\n'
+
+    def get_result_str(self):
+        return self.result_str
+
     def on_data(self, raw_data):
         #parse json
         tweet_json = json.loads(raw_data)
@@ -66,12 +74,23 @@ class CustomListener(StreamListener):
                 tweet_processed = json.loads(tweet_processed_str)
                 if len(tweet_processed['cluster']) > 1:
                     self.training_sample_index += 1
+
+                ################################################################
+                    contexts = self.lsa_obj.get_contexts()
+                    self.result_str += str(self.training_sample_index) + '\n'
+                    for i in tweet_processed['cluster']:
+                        self.result_str += contexts[i-1] + '\n'
+                    self.result_str += tweet_processed['context'] + \
+                        '\n************************\n'
+                ################################################################
             except:pass
         elif not self.NB_trained:
             self.NB_helper.read_sample_file(self.log_filename)
             X, Y = self.NB_helper.create_X_Y()
             self.NB_helper.fit_direct(X=X, Y=Y)
             self.NB_trained = True
+
+            self.result_str += '\nCLASSIFICATION BY NB\n'
         else:
             context_vector = self.lsa_obj.get_context_vector(tweet_json['text'])
             curr_cluster_index = self.NB_helper.predict_with_NB([context_vector])
@@ -79,25 +98,15 @@ class CustomListener(StreamListener):
             relevant_cluster = init_clusters[curr_cluster_index]
             ################################
             contexts = self.lsa_obj.get_contexts()
+            self.result_str += str(self.tweets_index) + '\n'
             for i in relevant_cluster:
-                print(contexts[i-1])
-            print(tweet_json['text'])
-            print('------------------------')
+                self.result_str += contexts[i-1]
+            self.result_str += tweet_json['text'] + \
+                '\n------------------------\n'
             ################################
 
-
-        ################################
-        contexts = self.lsa_obj.get_contexts()
-        if tweet_processed is not None:
-            if len(tweet_processed['cluster']) > 0:
-                for i in tweet_processed['cluster']:
-                    print(contexts[i-1])
-            print(tweet_processed['context'])
-            print('************************')
-        ################################
-
         #cycle condition
-        if self.training_sample_index >= self.training_sample_size:
+        if self.NB_trained:
             self.tweets_index += 1
         if self.tweets_index >= self.tweets_count:
             return False
@@ -117,7 +126,7 @@ class TwitterCrawler(object):
                         training_sample_size
                  ):
 
-        listnr = CustomListener(terms_filename,
+        self.listener = CustomListener(terms_filename,
                                 contexts_filename,
                                 log_filename,
                                 preserve_var_percentage,
@@ -127,13 +136,16 @@ class TwitterCrawler(object):
                                 )
         auth = OAuthHandler(API_KEY, API_SECRET)
         auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-        self.stream = Stream(auth, listnr)
+        self.stream = Stream(auth, self.listener)
 
     def filter_by_params(self, words=None, langs=None, follows=None, locations=None):
         self.stream.filter(track=words,
                            languages=langs,
                            follow=follows,
                            locations=locations)
+
+    def get_result_str(self):
+        return self.listener.get_result_str()
 
 # crawler = TwitterCrawler('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts','log.txt',0.2,0.8,20,10)
 # crawler.filter_by_params(['computer','user','system','trees','binary','graph'],['en'])

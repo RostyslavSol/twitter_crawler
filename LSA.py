@@ -56,11 +56,6 @@ class LSA(object):
 
         return context_vector
 
-
-        vector = np.mat(self.M)[:, self.contexts.index(context)].T.tolist()[0]
-        vector = [int(-1 + np.exp(v)) for v in vector]
-        return vector
-
     def add_new_context_to_analyze(self, context):
         context = self.process_text(context)
         self.contexts.append(context)
