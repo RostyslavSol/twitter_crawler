@@ -87,8 +87,8 @@ class CustomListener(StreamListener):
                     self.result_str += str(self.training_sample_index) + \
                                        ' cluster #' + \
                                        str(tweet_processed['cluster_index']) + '\n'
-                    for i in tweet_processed['cluster']:
-                        self.result_str += contexts[i-1] + '\n'
+                    # for i in tweet_processed['cluster']:
+                    #     self.result_str += contexts[i-1] + '\n'
                     self.result_str += tweet_processed['context'] + \
                         '\n************************\n'
                 ################################################################
@@ -104,15 +104,15 @@ class CustomListener(StreamListener):
         else:
             context_vector = self.lsa_obj.get_context_vector(tweet_json['text'])
             curr_cluster_index = self.NB_helper.predict_with_NB([context_vector])
-            init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
-            relevant_cluster = init_clusters[curr_cluster_index]
+            # init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
+            # relevant_cluster = init_clusters[curr_cluster_index]
             ################################
             self.record_sample_counts.append(curr_cluster_index[0])
 
             contexts = self.lsa_obj.get_contexts()
             self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
-            for i in relevant_cluster:
-                self.result_str += contexts[i-1]
+            # for i in relevant_cluster:
+            #     self.result_str += contexts[i-1]
             self.result_str += tweet_json['text'] + \
                 '\n------------------------\n'
             ################################

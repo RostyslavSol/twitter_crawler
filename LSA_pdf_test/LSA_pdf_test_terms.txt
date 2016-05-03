@@ -1,12 +1,12 @@
+graph
 human
 interface
-computer
+trees
 user
 system
 response
 time
 EPS
 survey
-trees
-graph
+computer
 minors

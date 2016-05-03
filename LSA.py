@@ -215,6 +215,7 @@ class LSA(object):
 
         # SVD decomposition
         M = np.mat(self.M)
+
         T, S, D = np.linalg.svd(M)
         reduced_dim = get_reduced_dim(S, preserve_var_percentage)
         svd_reconstruction = T[:, 0:reduced_dim] * np.diag(S[0:reduced_dim]) * D[0:reduced_dim, :]
@@ -225,7 +226,7 @@ class LSA(object):
             rel_matr.append([])
             for j in range(0, i):
                 rel_matr[i - 1].append(float(cos(svd_reconstruction[:, i], svd_reconstruction[:, j])))
-            #print(rel_matr[i - 1])
+            print(rel_matr[i - 1])
         self.rel_matr = rel_matr
 
         # clusterize contexts
