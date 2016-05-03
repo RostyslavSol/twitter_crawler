@@ -1,5 +1,6 @@
 # Import necessary libs
 import json
+import numpy as np
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
@@ -58,9 +59,13 @@ class CustomListener(StreamListener):
 
         #result
         self.result_str = '\nCLASSIFICATION BY LSA\n'
+        self.record_sample_counts = []
 
     def get_result_str(self):
         return self.result_str
+
+    def get_record_sample_counts(self):
+        return self.record_sample_counts
 
     def on_data(self, raw_data):
         #parse json
@@ -102,8 +107,10 @@ class CustomListener(StreamListener):
             init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
             relevant_cluster = init_clusters[curr_cluster_index]
             ################################
+            self.record_sample_counts.append(curr_cluster_index[0])
+
             contexts = self.lsa_obj.get_contexts()
-            self.result_str += str(self.tweets_index) + '\n'
+            self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
             for i in relevant_cluster:
                 self.result_str += contexts[i-1]
             self.result_str += tweet_json['text'] + \
@@ -143,12 +150,7 @@ class TwitterCrawler(object):
         auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
         self.stream = Stream(auth, self.listener)
 
-    def filter_by_params(self, words=None, langs=None, follows=None, locations=None):
-        self.stream.filter(track=words,
-                           languages=langs,
-                           follow=follows,
-                           locations=locations)
-
+    #region Helper methods
     def get_result_str(self):
         return self.listener.get_result_str()
 
@@ -157,5 +159,19 @@ class TwitterCrawler(object):
 
     def get_init_contexts(self):
         return self.listener.init_contexts
+
+    def get_sample_counts(self):
+        record_sample_counts = self.listener.get_record_sample_counts()
+        np_arr = np.array(record_sample_counts)
+        sample_counts = np.bincount(np_arr).tolist()
+        return sample_counts
+    #endregion
+
+    def filter_by_params(self, words=None, langs=None, follows=None, locations=None):
+        self.stream.filter(track=words,
+                           languages=langs,
+                           follow=follows,
+                           locations=locations)
+
 # crawler = TwitterCrawler('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts','log.txt',0.2,0.8,20,10)
 # crawler.filter_by_params(['computer','user','system','trees','binary','graph'],['en'])

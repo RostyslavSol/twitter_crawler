@@ -1,16 +1,36 @@
 import sys
-import PyQt4
 from PyQt4 import QtGui, QtCore
 from crawler import TwitterCrawler
+from custom_plotter import CustomPlotter
 
+
+class WindowNew(QtGui.QMainWindow):
+    def __init__(self, print_string):
+        super(WindowNew, self).__init__()
+        self.setGeometry(50, 50, 500, 400)
+        self.setWindowTitle('Initial clusters')
+
+        self.layout(print_string)
+
+        self.show()
+
+    def layout(self, print_string):
+        richTxt = QtGui.QTextEdit(self)
+        richTxt.setStyleSheet('font-size: 11pt;')
+        richTxt.resize(495, 395)
+        richTxt.move(5,5)
+        richTxt.setText(print_string)
 
 class Window(QtGui.QMainWindow):
     def __init__(self):
+        self.new_window = None
+
         #set null filenames
         self.track_words_filename = None
         self.langs_filename = None
         self.follows_filename = None
         self.locs_filename = None
+        self.pic_filename = None
 
         #params for crawler
         self.terms_filename = None
@@ -58,6 +78,7 @@ class Window(QtGui.QMainWindow):
         self.txtMinCos.setText('')
         self.txtVarPercent.setText('')
         self.richTxt.setText('')
+        self.txtPicFilename.setText('')
 
     #region Layouts
     def default_layout(self):
@@ -187,6 +208,14 @@ class Window(QtGui.QMainWindow):
         self.richTxt.resize(600, 550)
         self.richTxt.move(700, 90)
         self.richTxt.setStyleSheet('font-size: 12pt')
+        #------------ PicFilename --------
+        lbl = QtGui.QLabel("Plot name",self)
+        lbl.setStyleSheet('font-size: 12pt;')
+        lbl.resize(lbl.sizeHint())
+        lbl.move(220,300)
+        self.txtPicFilename = QtGui.QLineEdit(self)
+        self.txtPicFilename.resize(self.txtPicFilename.sizeHint())
+        self.txtPicFilename.move(220,320)
     #endregion
 
     #region ShowDialog Helpers
@@ -215,7 +244,7 @@ class Window(QtGui.QMainWindow):
         self.contexts_filename = fileName if '.txt' in fileName else fileName + '.txt'
     #endregion
 
-    #read files method
+    # read files method
     def extract_lines(self, filename):
         lines = None
         if filename != None:
@@ -227,7 +256,6 @@ class Window(QtGui.QMainWindow):
 
         return lines
 
-    #TODO: finish reading params
     def run_click(self):
         try:
             #region set mining params
@@ -255,6 +283,7 @@ class Window(QtGui.QMainWindow):
             self.min_cos_value = float(self.txtMinCos.text())
             self.tweets_count = int(self.txtTweetsCount.text())
             self.training_sample_size = int(self.txtTrainingSampleSize.text())
+            self.pic_filename = self.txtPicFilename.text() if self.txtPicFilename.text() != '' else None
             #endregion
         except Exception as ex:
             msg = QtGui.QMessageBox(self)
@@ -298,15 +327,19 @@ class Window(QtGui.QMainWindow):
                     for index_ in init_clusters[i]:
                         print_string += init_contexts[index_-1] + '\n'
                     print_string += '******************\n'
-                msg = QtGui.QMessageBox(self)
-                msg.setText(print_string)
-                msg.show()
+
+                def show_new_window(_self, print_string_):
+                    if _self.new_window is None:
+                        _self.new_window = WindowNew(print_string=print_string_)
+                    _self.new_window.show()
+                show_new_window(self, print_string)
                 #######################################################
 
                 crawler.filter_by_params(words=tracking_words, langs=langs, follows=follows, locations=locations)
 
-                #visualize resilts
+                # visualize results
                 self.richTxt.setText(crawler.get_result_str())
+                CustomPlotter.plot(crawler.get_sample_counts(), self.pic_filename)
             except Exception as ex:
                 msg = QtGui.QMessageBox(self)
                 msg.setText(ex.args[0])
