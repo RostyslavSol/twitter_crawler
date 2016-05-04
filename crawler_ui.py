@@ -286,6 +286,13 @@ class Window(QtGui.QMainWindow):
             self.pic_filename = self.txtPicFilename.text() if self.txtPicFilename.text() != '' else None
             #endregion
         except Exception as ex:
+            self.log_filename = None
+            self.preserve_var_percentage = None
+            self.min_cos_value = None
+            self.tweets_count = None
+            self.training_sample_size = None
+            self.pic_filename = None
+
             msg = QtGui.QMessageBox(self)
             msg.setText(ex.args[0])
             msg.show()
