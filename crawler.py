@@ -102,7 +102,8 @@ class CustomListener(StreamListener):
 
             self.result_str += '\nCLASSIFICATION BY NB\n'
         else:
-            context_vector = self.lsa_obj.get_context_vector(tweet_json['text'])
+            _context = self.lsa_obj.process_text(tweet_json['text'])
+            context_vector = self.lsa_obj.get_context_vector(_context)
             curr_cluster_index = self.NB_helper.predict_with_NB([context_vector])
             # init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
             # relevant_cluster = init_clusters[curr_cluster_index]
@@ -113,7 +114,7 @@ class CustomListener(StreamListener):
             self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
             # for i in relevant_cluster:
             #     self.result_str += contexts[i-1]
-            self.result_str += tweet_json['text'] + \
+            self.result_str += _context + \
                 '\n------------------------\n'
             ################################
 
