@@ -30,8 +30,8 @@ class LSA(object):
 
         contexts_file = open(contexts_filename, 'r')
         text = contexts_file.read()
-        self.contexts = text.split('\n')
-        self.contexts = [self.process_text(context) for context in self.contexts]
+        self.raw_contexts = text.split('\n')
+        self.contexts = [self.process_text(context) for context in self.raw_contexts]
         contexts_file.close()
 
     def fill_M(self):
@@ -46,6 +46,9 @@ class LSA(object):
 
     def get_contexts(self):
         return self.contexts
+
+    def get_raw_contexts(self):
+        return self.raw_contexts
 
     def get_context_vector(self, context):
         if len(self.terms) == 0 or len(self.contexts) == 0:

@@ -45,7 +45,7 @@ class CustomListener(StreamListener):
         self.lsa_var_percentage = preserve_var_percentage
         self.lsa_min_cos_val = min_cos_val
         self.init_clusters = self.lsa_obj.get_init_clusters(preserve_var_percentage, min_cos_val)
-        self.init_contexts = self.lsa_obj.get_contexts()
+        self.init_contexts = self.lsa_obj.get_raw_contexts()
 
         #stop crawling
         self.tweets_count = tweets_count
@@ -89,7 +89,7 @@ class CustomListener(StreamListener):
                                        str(tweet_processed['cluster_index']) + '\n'
                     # for i in tweet_processed['cluster']:
                     #     self.result_str += contexts[i-1] + '\n'
-                    self.result_str += tweet_processed['context'] + \
+                    self.result_str += tweet_json['text'] + \
                         '\n************************\n'
                 ################################################################
             except Exception as ex:
@@ -110,11 +110,11 @@ class CustomListener(StreamListener):
             ################################
             self.record_sample_counts.append(curr_cluster_index[0])
 
-            contexts = self.lsa_obj.get_contexts()
+            #contexts = self.lsa_obj.get_contexts()
             self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
             # for i in relevant_cluster:
             #     self.result_str += contexts[i-1]
-            self.result_str += _context + \
+            self.result_str += tweet_json['text'] + \
                 '\n------------------------\n'
             ################################
 
