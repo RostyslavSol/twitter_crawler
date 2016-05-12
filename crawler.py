@@ -4,7 +4,7 @@ import numpy as np
 from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
-from LSA import LSA
+from LSA import LSA, EPS
 from custom_naive_bayes import HelperForNB
 
 #region constants
@@ -60,12 +60,24 @@ class CustomListener(StreamListener):
         #result
         self.result_str = '\nCLASSIFICATION BY LSA\n'
         self.record_sample_counts = []
+        self.quality_cos_arr = []
 
     def get_result_str(self):
         return self.result_str
 
     def get_record_sample_counts(self):
         return self.record_sample_counts
+
+    def ncos(self, v1, v2):
+        _v1 = np.mat(v1)
+        _v2 = np.mat(v2)
+        norm_v1 = np.sqrt(_v1*_v1.T)
+        norm_v2 = np.sqrt(_v2*_v2.T)
+
+        if norm_v1 > EPS and norm_v2 > EPS:
+            return float(_v1*_v2.T / norm_v1 / norm_v2)
+        else:
+            return 0
 
     def on_data(self, raw_data):
         #parse json
@@ -102,19 +114,29 @@ class CustomListener(StreamListener):
 
             self.result_str += '\nCLASSIFICATION BY NB\n'
         else:
+            #classify tweet with NB
             _context = self.lsa_obj.process_text(tweet_json['text'])
             context_vector = self.lsa_obj.get_context_vector(_context)
             curr_cluster_index = self.NB_helper.predict_with_NB([context_vector])
-            # init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
-            # relevant_cluster = init_clusters[curr_cluster_index]
+            init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
+            relevant_cluster = init_clusters[curr_cluster_index]
             ################################
             self.record_sample_counts.append(curr_cluster_index[0])
 
-            #contexts = self.lsa_obj.get_contexts()
+            #add quality control
+            contexts = self.lsa_obj.get_contexts()
             self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
-            # for i in relevant_cluster:
-            #     self.result_str += contexts[i-1]
+            ncos_arr = []
+            for rc_index in relevant_cluster:
+                context_in_cluster = contexts[rc_index-1]
+                tmp_vector = self.lsa_obj.get_context_vector(context_in_cluster)
+                ncos_arr.append(self.ncos(context_vector, tmp_vector))
+
+            #record results
+            mean_ncos_arr = np.mean(ncos_arr)
+            self.quality_cos_arr.append(mean_ncos_arr)
             self.result_str += tweet_json['text'] + \
+                '\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
                 '\n------------------------\n'
             ################################
 
@@ -122,6 +144,7 @@ class CustomListener(StreamListener):
         if self.NB_trained:
             self.tweets_index += 1
         if self.tweets_index >= self.tweets_count:
+            self.result_str += '\n\n Total average cos: ' + str(np.mean(self.quality_cos_arr))
             return False
         else:
             return True
