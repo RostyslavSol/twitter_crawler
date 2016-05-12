@@ -121,28 +121,28 @@ class CustomListener(StreamListener):
             init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
             relevant_cluster = init_clusters[curr_cluster_index]
             ################################
-            self.record_sample_counts.append(curr_cluster_index[0])
-
             #add quality control
             contexts = self.lsa_obj.get_contexts()
-            self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
             ncos_arr = []
             for rc_index in relevant_cluster:
                 context_in_cluster = contexts[rc_index-1]
                 tmp_vector = self.lsa_obj.get_context_vector(context_in_cluster)
                 ncos_arr.append(self.ncos(context_vector, tmp_vector))
-
             #record results
             mean_ncos_arr = np.mean(ncos_arr)
-            self.quality_cos_arr.append(mean_ncos_arr)
-            self.result_str += tweet_json['text'] + \
-                '\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
-                '\n------------------------\n'
+
+            #cycle condition
+            if mean_ncos_arr > EPS and self.NB_trained:
+                self.record_sample_counts.append(curr_cluster_index[0])
+                self.quality_cos_arr.append(mean_ncos_arr)
+
+                self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
+                self.result_str += tweet_json['text'] + \
+                    '\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
+                    '\n------------------------\n'
+                self.tweets_index += 1
             ################################
 
-        #cycle condition
-        if self.NB_trained:
-            self.tweets_index += 1
         if self.tweets_index >= self.tweets_count:
             self.result_str += '\n\n Total average cos: ' + str(np.mean(self.quality_cos_arr))
             return False
