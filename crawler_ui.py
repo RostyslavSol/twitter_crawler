@@ -37,11 +37,6 @@ class Window(QtGui.QMainWindow):
         self.contexts_filename = None
         self.log_filename = None
 
-        self.preserve_var_percentage = None
-        self.min_cos_value = None
-        self.tweets_count = None
-        self.training_sample_size = None
-
         #UI initialization
         super(Window, self).__init__()
         self.setGeometry(10, 10, 1500, 1000)
@@ -66,11 +61,6 @@ class Window(QtGui.QMainWindow):
         self.contexts_filename = None
         self.log_filename = None
 
-        self.preserve_var_percentage = None
-        self.min_cos_value = None
-        self.tweets_count = None
-        self.training_sample_size = None
-
         #reset TextBoxes
         self.txtTrainingSampleSize.setText('')
         self.txtLogFilePath.setText('')
@@ -78,6 +68,7 @@ class Window(QtGui.QMainWindow):
         self.txtMinCos.setText('')
         self.txtVarPercent.setText('')
         self.richTxt.setText('')
+        self.txtClusterCos.setText('')
         self.txtPicFilename.setText('')
 
     #region Layouts
@@ -201,6 +192,14 @@ class Window(QtGui.QMainWindow):
         self.txtMinCos = QtGui.QLineEdit(self)
         self.txtMinCos.resize(self.txtVarPercent.sizeHint())
         self.txtMinCos.move(450, 270)
+        # ----------- ClusterCos -----------
+        lbl = QtGui.QLabel("Max cos in cluster for NB", self)
+        lbl.setStyleSheet('font-size: 12pt;')
+        lbl.resize(lbl.sizeHint())
+        lbl.move(450,300)
+        self.txtClusterCos = QtGui.QLineEdit(self)
+        self.txtClusterCos.resize(self.txtVarPercent.sizeHint())
+        self.txtClusterCos.move(450, 320)
 
     def result_layout(self):
         # ----------- richTxt -----------
@@ -279,18 +278,20 @@ class Window(QtGui.QMainWindow):
             tmp = self.txtLogFilePath.text()
             self.log_filename = tmp if '.txt' in tmp else tmp + '.txt'
 
-            self.preserve_var_percentage = float(self.txtVarPercent.text()) / 100.0
-            self.min_cos_value = float(self.txtMinCos.text())
-            self.tweets_count = int(self.txtTweetsCount.text())
-            self.training_sample_size = int(self.txtTrainingSampleSize.text())
-            self.pic_filename = self.txtPicFilename.text() if self.txtPicFilename.text() != '' else None
+            preserve_var_percentage = float(self.txtVarPercent.text()) / 100.0
+            min_cos_value = float(self.txtMinCos.text())
+            max_cos_val_NB = float(self.txtClusterCos.text())
+            tweets_count = int(self.txtTweetsCount.text())
+            training_sample_size = int(self.txtTrainingSampleSize.text())
+            pic_filename = self.txtPicFilename.text() if self.txtPicFilename.text() != '' else None
             #endregion
         except Exception as ex:
             self.log_filename = None
-            self.preserve_var_percentage = None
-            self.min_cos_value = None
-            self.tweets_count = None
-            self.training_sample_size = None
+            preserve_var_percentage = None
+            min_cos_value = None
+            max_cos_val_NB = None
+            tweets_count = None
+            training_sample_size = None
             self.pic_filename = None
 
             msg = QtGui.QMessageBox(self)
@@ -310,10 +311,11 @@ class Window(QtGui.QMainWindow):
         if self.terms_filename is not None and \
             self.contexts_filename is not None and \
             self.log_filename != '' and \
-            self.preserve_var_percentage is not None and \
-            self.min_cos_value is not None and \
-            self.tweets_count is not None and \
-            self.training_sample_size is not None and \
+            preserve_var_percentage is not None and \
+            min_cos_value is not None and \
+            max_cos_val_NB is not None and \
+            tweets_count is not None and \
+            training_sample_size is not None and \
             self.track_words_filename is not None:
 
             try:
@@ -322,6 +324,7 @@ class Window(QtGui.QMainWindow):
                                          log_filename=self.log_filename,
                                          preserve_var_percentage=self.preserve_var_percentage,
                                          min_cos_val=self.min_cos_value,
+                                         max_cos_val_NB=max_cos_val_NB,
                                          tweets_count=self.tweets_count,
                                          training_sample_size=self.training_sample_size
                                          )

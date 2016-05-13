@@ -30,6 +30,7 @@ class CustomListener(StreamListener):
                         log_filename,
                         preserve_var_percentage,
                         min_cos_val,
+                        max_cos_val_NB,
                         tweets_count,
                         training_sample_size
                 ):
@@ -44,6 +45,7 @@ class CustomListener(StreamListener):
         self.lsa_log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
         self.lsa_var_percentage = preserve_var_percentage
         self.lsa_min_cos_val = min_cos_val
+        self.max_cos_val_NB = max_cos_val_NB
         self.init_clusters = self.lsa_obj.get_init_clusters(preserve_var_percentage, min_cos_val)
         self.init_contexts = self.lsa_obj.get_raw_contexts()
 
@@ -134,15 +136,15 @@ class CustomListener(StreamListener):
             max_ncos_arr = max(ncos_arr)
 
             #cycle condition
-            if mean_ncos_arr > EPS and self.NB_trained:
+            if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
                 self.record_sample_counts.append(curr_cluster_index[0])
                 self.quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
                 self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
                 self.result_str += tweet_json['text'] + \
                     '\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
-                    ' Min cos in cluster: ' + str(min_ncos_arr) + \
-                    ' Max cos in cluster: ' + str(max_ncos_arr) + \
+                    '\nMin cos in cluster: ' + str(min_ncos_arr) + \
+                    '\nMax cos in cluster: ' + str(max_ncos_arr) + \
                     '\n------------------------\n'
                 self.tweets_index += 1
             ################################
@@ -165,6 +167,7 @@ class TwitterCrawler(object):
                         log_filename,
                         preserve_var_percentage,
                         min_cos_val,
+                        max_cos_val_NB,
                         tweets_count,
                         training_sample_size
                  ):
@@ -174,6 +177,7 @@ class TwitterCrawler(object):
                                 log_filename,
                                 preserve_var_percentage,
                                 min_cos_val,
+                                max_cos_val_NB,
                                 tweets_count,
                                 training_sample_size
                                 )
