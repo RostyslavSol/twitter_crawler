@@ -102,7 +102,7 @@ class CustomListener(StreamListener):
                                        ' | cluster #' + \
                                        str(tweet_processed['cluster_index']) + '\n'
                     self.result_str += tweet_json['text'] + \
-                        '\n===============================================================\n'
+                        '\n===============================================\n'
                 ################################################################
             except Exception as ex:
                 print(ex.args[0])
