@@ -130,21 +130,28 @@ class CustomListener(StreamListener):
                 ncos_arr.append(self.ncos(context_vector, tmp_vector))
             #record results
             mean_ncos_arr = np.mean(ncos_arr)
+            min_ncos_arr = min(ncos_arr)
+            max_ncos_arr = max(ncos_arr)
 
             #cycle condition
             if mean_ncos_arr > EPS and self.NB_trained:
                 self.record_sample_counts.append(curr_cluster_index[0])
-                self.quality_cos_arr.append(mean_ncos_arr)
+                self.quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
                 self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
                 self.result_str += tweet_json['text'] + \
                     '\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
+                    ' Min cos in cluster: ' + str(min_ncos_arr) + \
+                    ' Max cos in cluster: ' + str(max_ncos_arr) + \
                     '\n------------------------\n'
                 self.tweets_index += 1
             ################################
 
         if self.tweets_index >= self.tweets_count:
-            self.result_str += '\n\n Total average cos: ' + str(np.mean(self.quality_cos_arr))
+            total_mean_arr = np.mean(self.quality_cos_arr, axis=0)
+            self.result_str += '\n\n Total average cos: ' + str(total_mean_arr[0]) + \
+                                '\n Total average min cos: ' + str(total_mean_arr[1]) + \
+                                '\n Total average max cos: ' + str(total_mean_arr[2])
             return False
         else:
             return True
