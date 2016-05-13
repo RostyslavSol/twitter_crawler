@@ -336,7 +336,7 @@ class Window(QtGui.QMainWindow):
                     print_string += str(i) + '\n'
                     for index_ in init_clusters[i]:
                         print_string += init_contexts[index_-1] + '\n'
-                    print_string += '******************\n'
+                    print_string += '===================================\n'
 
                 def show_new_window(_self, print_string_):
                     if _self.new_window is None:

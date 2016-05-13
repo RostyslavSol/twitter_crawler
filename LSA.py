@@ -89,6 +89,7 @@ class LSA(object):
             .replace('@', '')\
             .replace('&gt;', '')\
             .replace('&amp;', '')\
+            .replace("'s", '')\
             .lower()
 
         return text

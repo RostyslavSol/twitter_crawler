@@ -60,7 +60,7 @@ class CustomListener(StreamListener):
         self.NB_trained = False
 
         #result
-        self.result_str = '\nCLASSIFICATION BY LSA\n'
+        self.result_str = '\nCLASSIFICATION BY LSA\n\n'
         self.record_sample_counts = []
         self.quality_cos_arr = []
 
@@ -102,7 +102,7 @@ class CustomListener(StreamListener):
                                        ' | cluster #' + \
                                        str(tweet_processed['cluster_index']) + '\n'
                     self.result_str += tweet_json['text'] + \
-                        '\n************************\n'
+                        '\n===============================================================\n'
                 ################################################################
             except Exception as ex:
                 print(ex.args[0])
@@ -112,7 +112,7 @@ class CustomListener(StreamListener):
             self.NB_helper.fit_direct(X=X, Y=Y)
             self.NB_trained = True
 
-            self.result_str += '\nCLASSIFICATION BY NB\n'
+            self.result_str += '\nCLASSIFICATION BY NB\n\n'
         else:
             #classify tweet with NB
             _context = self.lsa_obj.process_text(tweet_json['text'])
@@ -143,7 +143,7 @@ class CustomListener(StreamListener):
                     '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
                     '\nMin cos in cluster: ' + str(min_ncos_arr) + \
                     '\nMax cos in cluster: ' + str(max_ncos_arr) + \
-                    '\n------------------------\n'
+                    '\n-----------------------------------------------------------------------------------------------\n'
                 self.tweets_index += 1
             ################################
 
