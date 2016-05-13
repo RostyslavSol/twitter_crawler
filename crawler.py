@@ -98,11 +98,9 @@ class CustomListener(StreamListener):
 
                 ################################################################
                     contexts = self.lsa_obj.get_contexts()
-                    self.result_str += str(self.training_sample_index) + \
-                                       ' cluster #' + \
+                    self.result_str += 'Num# ' + str(self.training_sample_index) + \
+                                       ' | cluster #' + \
                                        str(tweet_processed['cluster_index']) + '\n'
-                    # for i in tweet_processed['cluster']:
-                    #     self.result_str += contexts[i-1] + '\n'
                     self.result_str += tweet_json['text'] + \
                         '\n************************\n'
                 ################################################################
@@ -140,9 +138,9 @@ class CustomListener(StreamListener):
                 self.record_sample_counts.append(curr_cluster_index[0])
                 self.quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
-                self.result_str += str(self.tweets_index) + ' cluster #' + str(curr_cluster_index[0]) + '\n'
+                self.result_str += 'Num# ' + str(self.tweets_index) + ' | cluster #' + str(curr_cluster_index[0]) + '\n'
                 self.result_str += tweet_json['text'] + \
-                    '\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
+                    '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
                     '\nMin cos in cluster: ' + str(min_ncos_arr) + \
                     '\nMax cos in cluster: ' + str(max_ncos_arr) + \
                     '\n------------------------\n'

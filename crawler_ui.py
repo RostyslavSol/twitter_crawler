@@ -322,11 +322,11 @@ class Window(QtGui.QMainWindow):
                 crawler = TwitterCrawler(terms_filename=self.terms_filename,
                                          contexts_filename=self.contexts_filename,
                                          log_filename=self.log_filename,
-                                         preserve_var_percentage=self.preserve_var_percentage,
-                                         min_cos_val=self.min_cos_value,
+                                         preserve_var_percentage=preserve_var_percentage,
+                                         min_cos_val=min_cos_value,
                                          max_cos_val_NB=max_cos_val_NB,
-                                         tweets_count=self.tweets_count,
-                                         training_sample_size=self.training_sample_size
+                                         tweets_count=tweets_count,
+                                         training_sample_size=training_sample_size
                                          )
                 #######################################################
                 init_clusters = crawler.get_init_clusters()
