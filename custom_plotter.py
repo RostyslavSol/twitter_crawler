@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 class CustomPlotter(object):
     @staticmethod
-    def plot(sample_count_arr, save_filename=None,  color=None):
+    def plot(sample_count_arr, cluster_names_hash, save_filename=None,  color=None):
         N = len(sample_count_arr)
         sample_std = [1 for i in range(N)]
 
@@ -20,7 +20,7 @@ class CustomPlotter(object):
         ax.set_ylabel('Sample count')
         ax.set_title('Ratings for clusters')
         ax.set_xticks(ind + width)
-        ax.set_xticklabels(['Cluster #' + str(i) for i in range(N)])
+        ax.set_xticklabels(['Cluster #' + str(i+1) + ' ' + cluster_names_hash[str(i)] for i in range(N)])
         
         #ax.legend([rects[0], ['Cluster #1', 'Cluster #2'])
         

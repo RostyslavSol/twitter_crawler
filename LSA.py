@@ -9,14 +9,33 @@ EPS = 1e-16
 
 class LSA(object):
     # read terms and contexts
-    def __init__(self):
+    def __init__(self, cluster_names):
         #LSA items
         self.terms = []
         self.contexts = []
         self.M = []
         self.init_clusters = None
+        self.cluster_names = cluster_names
+        self.cluster_names_hash = {}
 
     # region Helper methods
+    def get_cluster_names_hash(self):
+        return self.cluster_names_hash
+
+    def define_cluster_names(self):
+        if self.init_clusters is not None:
+            contexts = self.get_contexts()
+
+            for cluster in self.init_clusters:
+                for name in self.cluster_names:
+                    processed_name = name.lower()
+                    for context_index in cluster:
+                            cluster_index = self.init_clusters.index(cluster)
+                            self.cluster_names_hash.update({str(cluster_index): name})
+                            break
+        else:
+            raise Exception('Init clusters are None')
+
     def set_file_names(self, terms_filename, contexts_filename):
         if not ('.txt' in terms_filename and '.txt' in contexts_filename):
             terms_filename += '.txt'
@@ -106,6 +125,7 @@ class LSA(object):
     def get_init_clusters(self, preserve_var_percentage, min_cos_value):
         if self.init_clusters is None:
             self.init_clusters = self.apply_LSA(preserve_var_percentage, min_cos_value)
+            self.define_cluster_names()
         return self.init_clusters
     # endregion
 

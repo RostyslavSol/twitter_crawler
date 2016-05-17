@@ -319,7 +319,8 @@ class Window(QtGui.QMainWindow):
             self.track_words_filename is not None:
 
             try:
-                crawler = TwitterCrawler(terms_filename=self.terms_filename,
+                crawler = TwitterCrawler(tracking_words=tracking_words,
+                                         terms_filename=self.terms_filename,
                                          contexts_filename=self.contexts_filename,
                                          log_filename=self.log_filename,
                                          preserve_var_percentage=preserve_var_percentage,
@@ -331,9 +332,10 @@ class Window(QtGui.QMainWindow):
                 #######################################################
                 init_clusters = crawler.get_init_clusters()
                 init_contexts = crawler.get_init_contexts()
+                cluster_names_hash = crawler.get_cluster_names_hash()
                 print_string = 'INITIAL CLUSTERS:\n'
                 for i in range(len(init_clusters)):
-                    print_string += str(i+1) + '\n'
+                    print_string += str(i+1) + ' | ' + cluster_names_hash[str(i)] + '\n'
                     for index_ in init_clusters[i]:
                         print_string += init_contexts[index_-1] + '\n'
                     print_string += '===================================\n'
@@ -349,7 +351,7 @@ class Window(QtGui.QMainWindow):
 
                 # visualize results
                 self.richTxt.setText(crawler.get_result_str())
-                CustomPlotter.plot(crawler.get_sample_counts(), self.pic_filename)
+                CustomPlotter.plot(crawler.get_sample_counts(), cluster_names_hash, self.pic_filename)
             except Exception as ex:
                 msg = QtGui.QMessageBox(self)
                 msg.setText(ex.args[0])

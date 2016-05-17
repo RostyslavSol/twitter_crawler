@@ -25,7 +25,8 @@ API_SECRET = "keBkKDdhkjn2BbG6JJLkTu10wszh4qpSP7pOjDTTeNGOxKc7m7"
 # 7) training_sample_size
 #############################
 class CustomListener(StreamListener):
-    def __init__(self, terms_filename,
+    def __init__(self, tracking_words,
+                        terms_filename,
                         contexts_filename,
                         log_filename,
                         preserve_var_percentage,
@@ -39,7 +40,7 @@ class CustomListener(StreamListener):
         self.log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
 
         #use LSA
-        self.lsa_obj = LSA()
+        self.lsa_obj = LSA(tracking_words)
         self.lsa_obj.set_file_names(terms_filename=terms_filename,contexts_filename=contexts_filename)
         #set pars
         self.lsa_log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
@@ -66,6 +67,9 @@ class CustomListener(StreamListener):
 
     def get_result_str(self):
         return self.result_str
+
+    def get_cluster_names_hash(self):
+        return self.lsa_obj.get_cluster_names_hash()
 
     def get_record_sample_counts(self):
         return self.record_sample_counts
@@ -159,7 +163,8 @@ class CustomListener(StreamListener):
         print(str(status_code))
 
 class TwitterCrawler(object):
-    def __init__(self, terms_filename,
+    def __init__(self, tracking_words,
+                        terms_filename,
                         contexts_filename,
                         log_filename,
                         preserve_var_percentage,
@@ -169,7 +174,8 @@ class TwitterCrawler(object):
                         training_sample_size
                  ):
 
-        self.listener = CustomListener(terms_filename,
+        self.listener = CustomListener(tracking_words,
+                                terms_filename,
                                 contexts_filename,
                                 log_filename,
                                 preserve_var_percentage,
@@ -183,6 +189,9 @@ class TwitterCrawler(object):
         self.stream = Stream(auth, self.listener)
 
     #region Helper methods
+    def get_cluster_names_hash(self):
+        return self.listener.get_cluster_names_hash()
+
     def get_result_str(self):
         return self.listener.get_result_str()
 
