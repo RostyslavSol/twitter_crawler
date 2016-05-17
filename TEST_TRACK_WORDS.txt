@@ -1,6 +1,0 @@
-computer
-user
-system
-trees
-binary
-graph
