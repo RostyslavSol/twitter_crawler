@@ -30,6 +30,7 @@ class LSA(object):
                 for name in self.cluster_names:
                     processed_name = name.lower()
                     for context_index in cluster:
+                        if processed_name in contexts[context_index-1]:
                             cluster_index = self.init_clusters.index(cluster)
                             self.cluster_names_hash.update({str(cluster_index): name})
                             break
