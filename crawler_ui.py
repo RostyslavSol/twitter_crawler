@@ -333,7 +333,7 @@ class Window(QtGui.QMainWindow):
                 init_contexts = crawler.get_init_contexts()
                 print_string = 'INITIAL CLUSTERS:\n'
                 for i in range(len(init_clusters)):
-                    print_string += str(i) + '\n'
+                    print_string += str(i+1) + '\n'
                     for index_ in init_clusters[i]:
                         print_string += init_contexts[index_-1] + '\n'
                     print_string += '===================================\n'

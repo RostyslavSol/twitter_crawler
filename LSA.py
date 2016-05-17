@@ -265,15 +265,16 @@ class LSA(object):
                         cluster.remove(new_context_index)
 
                         #write to log file
-                        json_str = '{"cluster_index":'+\
-                                   str(clusters.index(cluster))+\
-                                   ',"cluster":'+\
-                                   str(cluster)+\
-                                   ',"context":"'+\
-                                   tweet_text+\
-                                   '","context_vector":'+\
-                                   str(vector)+'}'
-                        log_file.write(json_str + '\n')
+                        if len(cluster) > 1:
+                            json_str = '{"cluster_index":'+\
+                                       str(clusters.index(cluster))+\
+                                       ',"cluster":'+\
+                                       str(cluster)+\
+                                       ',"context":"'+\
+                                       tweet_text+\
+                                       '","context_vector":'+\
+                                       str(vector)+'}'
+                            log_file.write(json_str + '\n')
 
                 #remove new context
                 self.remove_new_context_to_analyze()
