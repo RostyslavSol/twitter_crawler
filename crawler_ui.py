@@ -335,7 +335,12 @@ class Window(QtGui.QMainWindow):
                 cluster_names_hash = crawler.get_cluster_names_hash()
                 print_string = 'INITIAL CLUSTERS:\n'
                 for i in range(len(init_clusters)):
-                    print_string += 'cluster# ' + str(i+1) + ' | ' + cluster_names_hash[str(i)] + '\n'
+                    cluster_name = ''
+                    try:
+                        cluster_name = cluster_names_hash[str(i)]
+                    except:
+                        pass
+                    print_string += 'cluster# ' + str(i+1) + ' | ' + cluster_name + '\n'
                     for index_ in init_clusters[i]:
                         print_string += init_contexts[index_-1] + '\n'
                     print_string += '===================================\n'
