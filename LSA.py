@@ -302,9 +302,6 @@ class LSA(object):
                                        '","context_vector":'+\
                                        str(vector)+'}'
                             log_file.write(json_str + '\n')
-
-                #remove new context
-                self.remove_new_context_to_analyze()
             else:
                 raise Exception('Empty terms or contexts apply_LSA_to_raw_data')
         except Exception as ex:
