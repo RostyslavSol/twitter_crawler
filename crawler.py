@@ -1,4 +1,6 @@
 # Import necessary libs
+import sys
+import os
 import json
 import numpy as np
 from tweepy.streaming import StreamListener
@@ -117,38 +119,43 @@ class CustomListener(StreamListener):
 
             self.result_str += '\nCLASSIFICATION BY NB\n\n'
         else:
-            #classify tweet with NB
-            _context = self.lsa_obj.process_text(tweet_json['text'])
-            context_vector = self.lsa_obj.get_context_vector(_context)
-            curr_cluster_index = self.NB_helper.predict_with_NB([context_vector])
-            init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
-            relevant_cluster = init_clusters[curr_cluster_index]
-            ################################
-            #add quality control
-            contexts = self.lsa_obj.get_contexts()
-            ncos_arr = []
-            for rc_index in relevant_cluster:
-                context_in_cluster = contexts[rc_index-1]
-                tmp_vector = self.lsa_obj.get_context_vector(context_in_cluster)
-                ncos_arr.append(self.ncos(context_vector, tmp_vector))
-            #record results
-            mean_ncos_arr = np.mean(ncos_arr)
-            min_ncos_arr = min(ncos_arr)
-            max_ncos_arr = max(ncos_arr)
+            try:
+                #classify tweet with NB
+                _context = self.lsa_obj.process_text(tweet_json['text'])
+                context_vector = self.lsa_obj.get_context_vector(_context)
+                curr_cluster_index = self.NB_helper.predict_with_NB([context_vector])
+                init_clusters = self.lsa_obj.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
+                relevant_cluster = init_clusters[curr_cluster_index]
+                ################################
+                #add quality control
+                contexts = self.lsa_obj.get_contexts()
+                ncos_arr = []
+                for rc_index in relevant_cluster:
+                    context_in_cluster = contexts[rc_index-1]
+                    tmp_vector = self.lsa_obj.get_context_vector(context_in_cluster)
+                    ncos_arr.append(self.ncos(context_vector, tmp_vector))
+                #record results
+                mean_ncos_arr = np.mean(ncos_arr)
+                min_ncos_arr = min(ncos_arr)
+                max_ncos_arr = max(ncos_arr)
 
-            #cycle condition
-            if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
-                self.record_sample_counts.append(curr_cluster_index[0])
-                self.quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
+                #cycle condition
+                if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
+                    self.record_sample_counts.append(curr_cluster_index[0])
+                    self.quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
-                self.result_str += 'Num# ' + str(self.tweets_index) + ' | cluster #' + str(curr_cluster_index[0]+1) + '\n'
-                self.result_str += tweet_json['text'] + \
-                    '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
-                    '\nMin cos in cluster: ' + str(min_ncos_arr) + \
-                    '\nMax cos in cluster: ' + str(max_ncos_arr) + \
-                    '\n-----------------------------------------------------------------------------------------------\n'
-                self.tweets_index += 1
-            ################################
+                    self.result_str += 'Num# ' + str(self.tweets_index) + ' | cluster #' + str(curr_cluster_index[0]+1) + '\n'
+                    self.result_str += tweet_json['text'] + \
+                        '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
+                        '\nMin cos in cluster: ' + str(min_ncos_arr) + \
+                        '\nMax cos in cluster: ' + str(max_ncos_arr) + \
+                        '\n-----------------------------------------------------------------------------------------------\n'
+                    self.tweets_index += 1
+                ################################
+            except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
 
         if self.tweets_index >= self.tweets_count:
             total_mean_arr = np.mean(self.quality_cos_arr, axis=0)

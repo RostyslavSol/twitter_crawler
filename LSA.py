@@ -25,15 +25,19 @@ class LSA(object):
     def define_cluster_names(self):
         if self.init_clusters is not None:
             contexts = self.get_contexts()
+            tmp_init_clusters = [el for el in self.init_clusters]
 
-            for cluster in self.init_clusters:
-                for name in self.cluster_names:
-                    processed_name = name.lower()
-                    for context_index in cluster:
-                        if processed_name in contexts[context_index-1]:
-                            cluster_index = self.init_clusters.index(cluster)
-                            self.cluster_names_hash.update({str(cluster_index): name})
-                            break
+            for name in self.cluster_names:
+                processed_name = name.lower()
+                for context in contexts:
+                    if processed_name in context:
+                        for cluster in tmp_init_clusters:
+                            context_index = contexts.index(context)+1
+                            if context_index in cluster:
+                                cluster_index = tmp_init_clusters.index(cluster)
+                                self.cluster_names_hash.update({str(cluster_index): name})
+                                break
+                        break
         else:
             raise Exception('Init clusters are None')
 
@@ -302,6 +306,7 @@ class LSA(object):
                                        '","context_vector":'+\
                                        str(vector)+'}'
                             log_file.write(json_str + '\n')
+                self.remove_new_context_to_analyze()
             else:
                 raise Exception('Empty terms or contexts apply_LSA_to_raw_data')
         except Exception as ex:
