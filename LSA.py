@@ -125,14 +125,16 @@ class LSA(object):
 
     def get_init_clusters(self, preserve_var_percentage, min_cos_value):
         if self.init_clusters is None:
-            self.init_clusters = self.apply_LSA(preserve_var_percentage, min_cos_value)
+            init_terms = self.get_terms()
+            init_contexts = self.get_contexts()
+            self.init_clusters = self.apply_LSA(init_terms, init_contexts, preserve_var_percentage, min_cos_value)
             self.define_cluster_names()
         return self.init_clusters
     # endregion
 
     #LSA itself
-    def apply_LSA(self, preserve_var_percentage, min_cos_value):
-        if len(self.terms) == 0 or len(self.contexts) == 0:
+    def apply_LSA(self, terms, contexts, preserve_var_percentage, min_cos_value):
+        if len(terms) == 0 or len(contexts) == 0:
             raise Exception('terms or contexts empty')
 
         # region Helpers
@@ -235,7 +237,7 @@ class LSA(object):
 
         # endregion
 
-        # fill matrix
+        # fill matrix and preserve it on class level
         self.fill_M()
 
         # SVD decomposition
@@ -247,7 +249,7 @@ class LSA(object):
 
         # relations matrix
         rel_matr = []
-        for i in range(1, len(self.contexts)):
+        for i in range(1, len(contexts)):
             rel_matr.append([])
             for j in range(0, i):
                 rel_matr[i - 1].append(float(cos(svd_reconstruction[:, i], svd_reconstruction[:, j])))
@@ -255,7 +257,7 @@ class LSA(object):
         self.rel_matr = rel_matr
 
         # clusterize contexts
-        clusters = clusterize(rel_matr, len(self.contexts), min_cos_value)
+        clusters = clusterize(rel_matr, len(contexts), min_cos_value)
 
         return clusters
 
@@ -273,10 +275,14 @@ class LSA(object):
                 #add new context
                 self.add_new_context_to_analyze(tweet_text)
 
+                terms = self.get_terms()
                 contexts = self.get_contexts()
 
-                clusters = self.apply_LSA(preserve_var_percentage=preserve_var_percentage,
-                                            min_cos_value=min_cos_value)
+                clusters = self.apply_LSA(terms=terms,
+                                          contexts=contexts,
+                                          preserve_var_percentage=preserve_var_percentage,
+                                          min_cos_value=min_cos_value
+                                          )
                 #define cluster of last context his index is len(contexts) (the new one)
                 new_context_index = len(contexts)
                 vector = self.get_context_vector(contexts[-1])
