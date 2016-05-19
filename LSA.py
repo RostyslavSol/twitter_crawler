@@ -285,8 +285,8 @@ class LSA(object):
                                           min_cos_value=min_cos_value
                                           )
                 #define cluster of last context his index is len(contexts) (the new one)
-                new_context_index = len(tmp_contexts)
-                vector = self.get_context_vector(tmp_contexts[-1])
+                new_context_index = tmp_contexts.index(tweet_text)
+                vector = self.get_context_vector(tweet_text)
 
                 for cluster in clusters:
                     if new_context_index in cluster:
@@ -294,7 +294,7 @@ class LSA(object):
 
                         #write to log file
                         init_clusters = self.get_init_clusters(preserve_var_percentage, min_cos_value)
-                        if len(cluster) > 1 and cluster in init_clusters:
+                        if cluster in init_clusters:
                             json_str = '{"cluster_index":'+\
                                        str(clusters.index(cluster))+\
                                        ',"cluster":'+\
@@ -318,15 +318,6 @@ class LSA(object):
 #################################
 ## to use perform following steps
 ##1) create obj
-##2) set_file_names to read terms and contexts
-##3) add new context to analyze
-##4) apply LSA
-##5) print contexts by clusters
+##2) set_file_names() (to read terms and contexts)
+##3) apply_LSA_on_raw_data() (for tweet json)
 #################################
-
-#region Test area
-# print('Test')
-# obj = LSA()
-# #obj.set_file_names('LSA_pdf_test/LSA_pdf_test_terms', 'LSA_pdf_test/LSA_pdf_test_contexts')
-# obj.set_file_names('D:/key_words.txt', 'D:/bball_contexts.txt')
-# obj.apply_LSA_on_raw_data('raw_bball', 'target_result', 0.2, 0.8)
