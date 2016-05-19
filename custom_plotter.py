@@ -18,7 +18,8 @@ class CustomPlotter(object):
 
         # add some text for labels, title and axes ticks
         ax.set_ylabel('Sample count')
-        ax.set_title('Ratings for clusters')
+        title_apendix = 'LSA' if color == 'blue' else 'NB'
+        ax.set_title('Ratings for clusters ' + title_apendix)
         ax.set_xticks(ind + width)
         ax.set_xticklabels(['Cluster #' + str(i+1) + ' ' + cluster_names_hash[str(i)] for i in range(N)])
         
