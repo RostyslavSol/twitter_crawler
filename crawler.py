@@ -31,8 +31,8 @@ API_SECRET = "keBkKDdhkjn2BbG6JJLkTu10wszh4qpSP7pOjDTTeNGOxKc7m7"
 #############################
 class CustomListener(StreamListener):
     def __init__(self, tracking_words,
-                        terms_filename,
-                        contexts_filename,
+                        raw_terms,
+                        raw_contexts,
                         log_filename,
                         preserve_var_percentage,
                         min_cos_val,
@@ -40,13 +40,10 @@ class CustomListener(StreamListener):
                         tweets_count,
                         training_sample_size
                 ):
-        terms_filename = terms_filename if '.txt' in terms_filename else terms_filename + '.txt'
-        contexts_filename = contexts_filename if '.txt' in contexts_filename else contexts_filename + '.txt'
         self.log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
 
         #use LSA
-        self._lsa_model = LSA(tracking_words)
-        self._lsa_model.set_file_names(terms_filename=terms_filename, contexts_filename=contexts_filename)
+        self._lsa_model = LSA(cluster_names=tracking_words, raw_terms=raw_terms, raw_contexts=raw_contexts)
         self._init_clusters = self._lsa_model.get_init_clusters(preserve_var_percentage, min_cos_val)
         self._init_contexts = self._lsa_model.get_raw_contexts()
         #set pars
@@ -189,8 +186,8 @@ class CustomListener(StreamListener):
 
 class TwitterCrawler(object):
     def __init__(self, tracking_words,
-                        terms_filename,
-                        contexts_filename,
+                        raw_terms,
+                        raw_contexts,
                         log_filename,
                         preserve_var_percentage,
                         min_cos_val,
@@ -200,8 +197,8 @@ class TwitterCrawler(object):
                  ):
 
         self._listener = CustomListener(tracking_words,
-                                        terms_filename,
-                                        contexts_filename,
+                                        raw_terms,
+                                        raw_contexts,
                                         log_filename,
                                         preserve_var_percentage,
                                         min_cos_val,

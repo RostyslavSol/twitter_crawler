@@ -19,24 +19,25 @@ EPS = 1e-16
 ######################################################################
 class LSA(object):
     # read terms and contexts
-    def __init__(self, cluster_names):
+    def __init__(self, cluster_names, raw_terms, raw_contexts):
         #LSA items
-        self.terms = []
-        self.contexts = []
-        self.M = []
-        self.init_clusters = None
-        self.cluster_names = cluster_names
-        self.cluster_names_hash = {}
+        self._cluster_names = cluster_names
+        self._terms = [term.lower() for term in raw_terms]
+        self._contexts = [self.process_text(context) for context in raw_contexts]
+
+        self._M = []
+        self._init_clusters = None
+        self._cluster_names_hash = {}
 
     # region Helper methods
 
     # region Private methods
     def _define_cluster_names(self):
-        if self.init_clusters is not None:
+        if self._init_clusters is not None:
             contexts = self.get_contexts()
-            tmp_init_clusters = [el for el in self.init_clusters]
+            tmp_init_clusters = [el for el in self._init_clusters]
 
-            for name in self.cluster_names:
+            for name in self._cluster_names:
                 processed_name = name.lower()
                 for context in contexts:
                     if processed_name in context:
@@ -44,56 +45,39 @@ class LSA(object):
                             context_index = contexts.index(context)+1
                             if context_index in cluster:
                                 cluster_index = tmp_init_clusters.index(cluster)
-                                self.cluster_names_hash.update({str(cluster_index): name})
+                                self._cluster_names_hash.update({str(cluster_index): name})
                                 break
                         break
         else:
             raise Exception('Init clusters are None')
 
     def _fill_M(self, terms, contexts):
-        self.M = []
+        self._M = []
         for i in range(len(terms)):
-            self.M.append([])
+            self._M.append([])
             for j in range(len(contexts)):
-                self.M[i].append(np.log(1 + self.count_word_in_text(terms[i], contexts[j])))
+                self._M[i].append(np.log(1 + self.count_word_in_text(terms[i], contexts[j])))
     # endregion
 
     # region Public methods
     def get_cluster_names_hash(self):
-        return self.cluster_names_hash.copy()
-
-    def set_file_names(self, terms_filename, contexts_filename):
-        if not ('.txt' in terms_filename and '.txt' in contexts_filename):
-            terms_filename += '.txt'
-            contexts_filename += '.txt'
-
-        terms_file = open(terms_filename, 'r')
-        text = terms_file.read()
-        self.terms = text.split('\n')
-        self.terms = [term.lower() for term in self.terms]
-        terms_file.close()
-
-        contexts_file = open(contexts_filename, 'r')
-        text = contexts_file.read()
-        self.raw_contexts = text.split('\n')
-        self.contexts = [self.process_text(context) for context in self.raw_contexts]
-        contexts_file.close()
+        return self._cluster_names_hash.copy()
 
     def get_terms(self):
-        return self.terms.copy()
+        return self._terms.copy()
 
     def get_contexts(self):
-        return self.contexts.copy()
+        return self._contexts.copy()
 
     def get_raw_contexts(self):
         return self.raw_contexts.copy()
 
     def get_context_vector(self, context):
-        if len(self.terms) == 0 or len(self.contexts) == 0:
+        if len(self._terms) == 0 or len(self._contexts) == 0:
             raise Exception('Error: empty terms or contexts')
         context_vector = []
-        for i in range(len(self.terms)):
-            context_vector.append(self.count_word_in_text(self.terms[i], context))
+        for i in range(len(self._terms)):
+            context_vector.append(self.count_word_in_text(self._terms[i], context))
 
         return context_vector
 
@@ -135,16 +119,16 @@ class LSA(object):
         return count
 
     def get_init_clusters(self, preserve_var_percentage, min_cos_value):
-        if self.init_clusters is None:
+        if self._init_clusters is None:
             init_terms = self.get_terms()
             init_contexts = self.get_contexts()
-            self.init_clusters = self._apply_LSA(init_terms,
-                                                 init_contexts,
-                                                 preserve_var_percentage,
-                                                 min_cos_value
-                                                 )
+            self._init_clusters = self._apply_LSA(init_terms,
+                                                  init_contexts,
+                                                  preserve_var_percentage,
+                                                  min_cos_value
+                                                  )
             self._define_cluster_names()
-        return self.init_clusters.copy()
+        return self._init_clusters.copy()
     # endregion
 
     # endregion
@@ -259,7 +243,7 @@ class LSA(object):
         self._fill_M(terms=terms, contexts=contexts)
 
         # SVD decomposition
-        M = np.mat(self.M)
+        M = np.mat(self._M)
 
         T, S, D = np.linalg.svd(M)
         reduced_dim = get_reduced_dim(S, preserve_var_percentage)
