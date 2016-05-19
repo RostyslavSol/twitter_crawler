@@ -21,10 +21,9 @@ class LSA(object):
         self.cluster_names_hash = {}
 
     # region Helper methods
-    def get_cluster_names_hash(self):
-        return self.cluster_names_hash.copy()
 
-    def define_cluster_names(self):
+    # region Private methods
+    def _define_cluster_names(self):
         if self.init_clusters is not None:
             contexts = self.get_contexts()
             tmp_init_clusters = [el for el in self.init_clusters]
@@ -43,6 +42,18 @@ class LSA(object):
         else:
             raise Exception('Init clusters are None')
 
+    def _fill_M(self, terms, contexts):
+        self.M = []
+        for i in range(len(terms)):
+            self.M.append([])
+            for j in range(len(contexts)):
+                self.M[i].append(np.log(1 + self.count_word_in_text(terms[i], contexts[j])))
+    # endregion
+
+    # region Public methods
+    def get_cluster_names_hash(self):
+        return self.cluster_names_hash.copy()
+
     def set_file_names(self, terms_filename, contexts_filename):
         if not ('.txt' in terms_filename and '.txt' in contexts_filename):
             terms_filename += '.txt'
@@ -59,13 +70,6 @@ class LSA(object):
         self.raw_contexts = text.split('\n')
         self.contexts = [self.process_text(context) for context in self.raw_contexts]
         contexts_file.close()
-
-    def fill_M(self, terms, contexts):
-        self.M = []
-        for i in range(len(terms)):
-            self.M.append([])
-            for j in range(len(contexts)):
-                self.M[i].append(np.log(1 + self.count_word_in_text(terms[i], contexts[j])))
 
     def get_terms(self):
         return self.terms.copy()
@@ -131,8 +135,10 @@ class LSA(object):
                                                 preserve_var_percentage,
                                                 min_cos_value
                                                 )
-            self.define_cluster_names()
+            self._define_cluster_names()
         return self.init_clusters.copy()
+    # endregion
+
     # endregion
 
     #LSA itself
@@ -241,7 +247,7 @@ class LSA(object):
         # endregion
 
         # fill matrix and preserve it on class level
-        self.fill_M(terms=terms, contexts=contexts)
+        self._fill_M(terms=terms, contexts=contexts)
 
         # SVD decomposition
         M = np.mat(self.M)
