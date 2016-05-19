@@ -23,6 +23,7 @@ class LSA(object):
         #LSA items
         self._cluster_names = cluster_names
         self._terms = [term.lower() for term in raw_terms]
+        self._raw_contexts = raw_contexts
         self._contexts = [self.process_text(context) for context in raw_contexts]
 
         self._M = []
@@ -70,7 +71,7 @@ class LSA(object):
         return self._contexts.copy()
 
     def get_raw_contexts(self):
-        return self.raw_contexts.copy()
+        return self._raw_contexts.copy()
 
     def get_context_vector(self, context):
         if len(self._terms) == 0 or len(self._contexts) == 0:
