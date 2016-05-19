@@ -1,3 +1,5 @@
+import sys
+import os
 import numpy as np
 import re
 import json
@@ -20,7 +22,7 @@ class LSA(object):
 
     # region Helper methods
     def get_cluster_names_hash(self):
-        return self.cluster_names_hash
+        return self.cluster_names_hash.copy()
 
     def define_cluster_names(self):
         if self.init_clusters is not None:
@@ -58,21 +60,21 @@ class LSA(object):
         self.contexts = [self.process_text(context) for context in self.raw_contexts]
         contexts_file.close()
 
-    def fill_M(self):
+    def fill_M(self, terms, contexts):
         self.M = []
-        for i in range(len(self.terms)):
+        for i in range(len(terms)):
             self.M.append([])
-            for j in range(len(self.contexts)):
-                self.M[i].append(np.log(1 + self.count_word_in_text(self.terms[i], self.contexts[j])))
+            for j in range(len(contexts)):
+                self.M[i].append(np.log(1 + self.count_word_in_text(terms[i], contexts[j])))
 
     def get_terms(self):
-        return self.terms
+        return self.terms.copy()
 
     def get_contexts(self):
-        return self.contexts
+        return self.contexts.copy()
 
     def get_raw_contexts(self):
-        return self.raw_contexts
+        return self.raw_contexts.copy()
 
     def get_context_vector(self, context):
         if len(self.terms) == 0 or len(self.contexts) == 0:
@@ -82,13 +84,6 @@ class LSA(object):
             context_vector.append(self.count_word_in_text(self.terms[i], context))
 
         return context_vector
-
-    def add_new_context_to_analyze(self, context):
-        context = self.process_text(context)
-        self.contexts.append(context)
-
-    def remove_new_context_to_analyze(self):
-        self.contexts.remove(self.contexts[-1])
 
     def process_text(self, text):
         #remove links
@@ -137,7 +132,7 @@ class LSA(object):
                                                 min_cos_value
                                                 )
             self.define_cluster_names()
-        return self.init_clusters
+        return self.init_clusters.copy()
     # endregion
 
     #LSA itself
@@ -246,7 +241,7 @@ class LSA(object):
         # endregion
 
         # fill matrix and preserve it on class level
-        self.fill_M()
+        self.fill_M(terms=terms, contexts=contexts)
 
         # SVD decomposition
         M = np.mat(self.M)
@@ -277,23 +272,21 @@ class LSA(object):
         try:
             #remove characters and lowercase the text
             tweet_text = self.process_text(tweet_json['text'])
-
+            terms = self.get_terms()
+            tmp_contexts = self.get_contexts()
             #perform analysis
-            if len(self.terms) > 0 and len(self.contexts) > 0:
+            if len(terms) > 0 and len(tmp_contexts) > 0:
                 #add new context
-                self.add_new_context_to_analyze(tweet_text)
-
-                terms = self.get_terms()
-                contexts = self.get_contexts()
+                tmp_contexts.append(tweet_text)
 
                 clusters = self.apply_LSA(terms=terms,
-                                          contexts=contexts,
+                                          contexts=tmp_contexts,
                                           preserve_var_percentage=preserve_var_percentage,
                                           min_cos_value=min_cos_value
                                           )
                 #define cluster of last context his index is len(contexts) (the new one)
-                new_context_index = len(contexts)
-                vector = self.get_context_vector(contexts[-1])
+                new_context_index = len(tmp_contexts)
+                vector = self.get_context_vector(tmp_contexts[-1])
 
                 for cluster in clusters:
                     if new_context_index in cluster:
@@ -311,11 +304,13 @@ class LSA(object):
                                        '","context_vector":'+\
                                        str(vector)+'}'
                             log_file.write(json_str + '\n')
-                self.remove_new_context_to_analyze()
             else:
                 raise Exception('Empty terms or contexts apply_LSA_to_raw_data')
         except Exception as ex:
-            print(ex.args)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            error_str = str(exc_type) + '\n' + str(fname) + '\n' + str(exc_tb.tb_lineno)
+            print(error_str)
 
         log_file.close()
         return json_str
