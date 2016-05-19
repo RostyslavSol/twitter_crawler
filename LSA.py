@@ -9,6 +9,14 @@ URL_REGEX = r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:
 EPS = 1e-16
 #endregion
 
+######################################################################
+## to use perform following steps
+##1) create obj
+##2) set_file_names() (to read terms and contexts)
+##3) apply_LSA_on_raw_data() (for tweet json)
+##4) get_init_clusters() (to get first formed clusters)
+##5) get_cluster_names_hash() (to get names for first formed clusters)
+######################################################################
 class LSA(object):
     # read terms and contexts
     def __init__(self, cluster_names):
@@ -130,11 +138,11 @@ class LSA(object):
         if self.init_clusters is None:
             init_terms = self.get_terms()
             init_contexts = self.get_contexts()
-            self.init_clusters = self.apply_LSA(init_terms,
-                                                init_contexts,
-                                                preserve_var_percentage,
-                                                min_cos_value
-                                                )
+            self.init_clusters = self._apply_LSA(init_terms,
+                                                 init_contexts,
+                                                 preserve_var_percentage,
+                                                 min_cos_value
+                                                 )
             self._define_cluster_names()
         return self.init_clusters.copy()
     # endregion
@@ -142,7 +150,8 @@ class LSA(object):
     # endregion
 
     #LSA itself
-    def apply_LSA(self, terms, contexts, preserve_var_percentage, min_cos_value):
+    # private method
+    def _apply_LSA(self, terms, contexts, preserve_var_percentage, min_cos_value):
         if len(terms) == 0 or len(contexts) == 0:
             raise Exception('terms or contexts empty')
 
@@ -271,6 +280,7 @@ class LSA(object):
         return clusters
 
     #working with raw_data in json format
+    # public method
     def apply_LSA_on_raw_data(self, log_file_name, tweet_json, preserve_var_percentage, min_cos_value):
         log_file_name = log_file_name if '.txt' in log_file_name else log_file_name + '.txt'
         log_file = open(log_file_name, 'a+')
@@ -285,11 +295,11 @@ class LSA(object):
                 #add new context
                 tmp_contexts.append(tweet_text)
 
-                clusters = self.apply_LSA(terms=terms,
-                                          contexts=tmp_contexts,
-                                          preserve_var_percentage=preserve_var_percentage,
-                                          min_cos_value=min_cos_value
-                                          )
+                clusters = self._apply_LSA(terms=terms,
+                                           contexts=tmp_contexts,
+                                           preserve_var_percentage=preserve_var_percentage,
+                                           min_cos_value=min_cos_value
+                                           )
                 #define cluster of last context his index is len(contexts) (the new one)
                 new_context_index = tmp_contexts.index(tweet_text)
                 vector = self.get_context_vector(tweet_text)
@@ -320,10 +330,3 @@ class LSA(object):
 
         log_file.close()
         return json_str
-
-#################################
-## to use perform following steps
-##1) create obj
-##2) set_file_names() (to read terms and contexts)
-##3) apply_LSA_on_raw_data() (for tweet json)
-#################################

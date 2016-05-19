@@ -38,5 +38,3 @@ class CustomPlotter(object):
             save_filename = save_filename if '.png' in save_filename else save_filename + '.png'
             plt.savefig(save_filename)
         plt.show()
-
-#CustomPlotter.plot([12,3,5], save_filename='asf')

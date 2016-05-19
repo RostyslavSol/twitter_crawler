@@ -1,6 +1,14 @@
 from sklearn.naive_bayes import MultinomialNB
 import json
 
+#############################################
+## to use perform following steps
+##1) create obj
+##2) read_sample_file() (to read JSON sample)
+##3) create_X_Y() (to build training sample)
+##4) fit_direct() (to train NB)
+##5) predict_with_NB() (to get the results)
+#############################################
 class HelperForNB(object):
     def read_sample_file(self, json_sample_filename):
         #get json sample from txt file
@@ -34,9 +42,3 @@ class HelperForNB(object):
 
     def predict_with_NB(self, huge_sample):
         return self.classifier.predict(huge_sample)
-
-# obj = HelperForNB('target_result')
-# X, Y = obj.get_X(), obj.get_Y()
-# obj.fit_direct(X[0:80], Y[0:80])
-# #print(obj.predict_with_NB([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]]))
-# print(obj.predict_with_NB(X))
