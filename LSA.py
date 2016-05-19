@@ -286,7 +286,7 @@ class LSA(object):
                                            min_cos_value=min_cos_value
                                            )
                 #define cluster of last context his index is len(contexts) (the new one)
-                new_context_index = tmp_contexts.index(tweet_text)
+                new_context_index = tmp_contexts.index(tweet_text) + 1
                 vector = self.get_context_vector(tweet_text)
 
                 for cluster in clusters:
