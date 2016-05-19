@@ -383,7 +383,7 @@ class Window(QtGui.QMainWindow):
                     pic_name = 'lsa_' + self.pic_filename if self.pic_filename is not None else None
                     CustomPlotter.plot(crawler.get_sample_counts_LSA(), cluster_names_hash, pic_name, color='blue')
                 except:
-                    raise Exception('No LSA classification')
+                    raise Exception('No LSA classification plot')
             except Exception as ex:
                 msg = QtGui.QMessageBox(self)
                 exc_type, exc_obj, exc_tb = sys.exc_info()
