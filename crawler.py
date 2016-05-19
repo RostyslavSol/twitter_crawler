@@ -44,13 +44,13 @@ class CustomListener(StreamListener):
         #use LSA
         self.lsa_obj = LSA(tracking_words)
         self.lsa_obj.set_file_names(terms_filename=terms_filename,contexts_filename=contexts_filename)
+        self.init_clusters = self.lsa_obj.get_init_clusters(preserve_var_percentage, min_cos_val)
+        self.init_contexts = self.lsa_obj.get_raw_contexts()
         #set pars
         self.lsa_log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
         self.lsa_var_percentage = preserve_var_percentage
         self.lsa_min_cos_val = min_cos_val
         self.max_cos_val_NB = max_cos_val_NB
-        self.init_clusters = self.lsa_obj.get_init_clusters(preserve_var_percentage, min_cos_val)
-        self.init_contexts = self.lsa_obj.get_raw_contexts()
 
         #stop crawling
         self.tweets_count = tweets_count
@@ -65,6 +65,7 @@ class CustomListener(StreamListener):
         #result
         self.result_str = '\nCLASSIFICATION BY LSA\n\n'
         self.record_sample_counts = []
+        self.record_sample_counts_LSA = []
         self.quality_cos_arr = []
 
     def get_result_str(self):
@@ -75,6 +76,9 @@ class CustomListener(StreamListener):
 
     def get_record_sample_counts(self):
         return self.record_sample_counts
+
+    def get_record_sample_counts_LSA(self):
+        return self.record_sample_counts_LSA
 
     def ncos(self, v1, v2):
         _v1 = np.mat(v1)
@@ -98,17 +102,19 @@ class CustomListener(StreamListener):
                                                                         tweet_json=tweet_json,
                                                                         preserve_var_percentage=self.lsa_var_percentage,
                                                                         min_cos_value=self.lsa_min_cos_val)
-                tweet_processed = json.loads(tweet_processed_str)
-                self.training_sample_index += 1
+                if tweet_processed_str is not None:
+                    self.training_sample_index += 1
 
-                ################################################################
-                contexts = self.lsa_obj.get_contexts()
-                self.result_str += 'Num# ' + str(self.training_sample_index) + \
-                                   ' | cluster #' + \
-                                   str(tweet_processed['cluster_index']+1) + '\n'
-                self.result_str += tweet_json['text'] + \
-                    '\n===============================================\n'
-                ################################################################
+                    tweet_processed = json.loads(tweet_processed_str)
+
+                    ################################################################
+                    self.record_sample_counts_LSA.append(int(tweet_processed['cluster_index']))
+                    self.result_str += 'Num# ' + str(self.training_sample_index) + \
+                                       ' | cluster #' + \
+                                       str(tweet_processed['cluster_index']+1) + '\n'
+                    self.result_str += tweet_json['text'] + \
+                        '\n===============================================\n'
+                    ################################################################
             except Exception as ex:
                 print(ex.args[0])
         elif not self.NB_trained:
@@ -210,6 +216,12 @@ class TwitterCrawler(object):
 
     def get_sample_counts(self):
         record_sample_counts = self.listener.get_record_sample_counts()
+        np_arr = np.array(record_sample_counts)
+        sample_counts = np.bincount(np_arr).tolist()
+        return sample_counts
+
+    def get_sample_counts_LSA(self):
+        record_sample_counts = self.listener.get_record_sample_counts_LSA()
         np_arr = np.array(record_sample_counts)
         sample_counts = np.bincount(np_arr).tolist()
         return sample_counts

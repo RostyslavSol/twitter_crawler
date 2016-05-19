@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt4 import QtGui, QtCore
 from crawler import TwitterCrawler
 from custom_plotter import CustomPlotter
@@ -356,10 +357,13 @@ class Window(QtGui.QMainWindow):
 
                 # visualize results
                 self.richTxt.setText(crawler.get_result_str())
-                CustomPlotter.plot(crawler.get_sample_counts(), cluster_names_hash, self.pic_filename)
+                CustomPlotter.plot(crawler.get_sample_counts(), cluster_names_hash, self.pic_filename, color='green')
             except Exception as ex:
                 msg = QtGui.QMessageBox(self)
-                msg.setText(ex.args[0])
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                error_str = str(exc_type) + '\n' + str(fname) + '\n' + str(exc_tb.tb_lineno)
+                msg.setText(error_str)
                 msg.show()
         else:
             msg = QtGui.QMessageBox(self)

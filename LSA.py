@@ -131,7 +131,11 @@ class LSA(object):
         if self.init_clusters is None:
             init_terms = self.get_terms()
             init_contexts = self.get_contexts()
-            self.init_clusters = self.apply_LSA(init_terms, init_contexts, preserve_var_percentage, min_cos_value)
+            self.init_clusters = self.apply_LSA(init_terms,
+                                                init_contexts,
+                                                preserve_var_percentage,
+                                                min_cos_value
+                                                )
             self.define_cluster_names()
         return self.init_clusters
     # endregion
@@ -296,7 +300,8 @@ class LSA(object):
                         cluster.remove(new_context_index)
 
                         #write to log file
-                        if len(cluster) > 1:
+                        init_clusters = self.get_init_clusters(preserve_var_percentage, min_cos_value)
+                        if len(cluster) > 1 and cluster in init_clusters:
                             json_str = '{"cluster_index":'+\
                                        str(clusters.index(cluster))+\
                                        ',"cluster":'+\
