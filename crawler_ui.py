@@ -256,6 +256,22 @@ class Window(QtGui.QMainWindow):
 
         return lines
 
+    def get_raw_terms_and_contexts_from_files(self, terms_filename, contexts_filename):
+        if not ('.txt' in terms_filename and '.txt' in contexts_filename):
+            terms_filename += '.txt'
+            contexts_filename += '.txt'
+
+        terms_file = open(terms_filename, 'r')
+        text = terms_file.read()
+        raw_terms = text.split('\n')
+        terms_file.close()
+
+        contexts_file = open(contexts_filename, 'r')
+        text = contexts_file.read()
+        raw_contexts = text.split('\n')
+        contexts_file.close()
+        return raw_terms, raw_contexts
+
     def run_click(self):
         try:
             #region set mining params
@@ -320,9 +336,14 @@ class Window(QtGui.QMainWindow):
             self.track_words_filename is not None:
 
             try:
+                raw_terms, raw_contexts = self.get_raw_terms_and_contexts_from_files(self.terms_filename,
+                                                                                     self.contexts_filename)
+                if raw_terms is None or len(raw_terms) < 1 or \
+                    raw_contexts is None or len(raw_contexts) < 1:
+                    raise Exception('Error: no terms or contexts read')
                 crawler = TwitterCrawler(tracking_words=tracking_words,
-                                         terms_filename=self.terms_filename,
-                                         contexts_filename=self.contexts_filename,
+                                         raw_terms=raw_terms,
+                                         raw_contexts=raw_contexts,
                                          log_filename=self.log_filename,
                                          preserve_var_percentage=preserve_var_percentage,
                                          min_cos_val=min_cos_value,
