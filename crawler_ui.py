@@ -361,14 +361,13 @@ class Window(QtGui.QMainWindow):
                         cluster_name = cluster_names_hash[str(i)]
                     except:
                         pass
-                    print_string += 'cluster# ' + str(i+1) + ' | ' + cluster_name + '\n'
+                    print_string += 'Cluster# ' + str(i+1) + ' | ' + cluster_name + '\n'
                     for index_ in init_clusters[i]:
                         print_string += init_contexts[index_-1] + '\n'
                     print_string += '===================================\n'
 
                 def show_new_window(_self, print_string_):
-                    if _self.new_window is None:
-                        _self.new_window = WindowNew(print_string=print_string_)
+                    _self.new_window = WindowNew(print_string=print_string_)
                     _self.new_window.show()
                 show_new_window(self, print_string)
                 #######################################################
