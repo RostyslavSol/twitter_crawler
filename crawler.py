@@ -41,14 +41,13 @@ class CustomListener(StreamListener):
                         tweets_count,
                         training_sample_size
                 ):
-        self.log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
-
         #use LSA
         self._lsa_model = LSA(cluster_names=tracking_words, raw_terms=raw_terms, raw_contexts=raw_contexts)
         self._init_clusters = self._lsa_model.get_init_clusters(preserve_var_percentage, min_cos_val)
         self._init_contexts = self._lsa_model.get_raw_contexts()
         #set pars
-        self.lsa_log_filename = log_filename if '.txt' in log_filename else log_filename + '.txt'
+        lsa_log_filename = log_filename if '.json' in log_filename else log_filename + '.json'
+        self.lsa_log_file = open(self.lsa_log_filename, 'w')
         self.lsa_var_percentage = preserve_var_percentage
         self.lsa_min_cos_val = min_cos_val
         self.max_cos_val_NB = max_cos_val_NB
@@ -121,10 +120,10 @@ class CustomListener(StreamListener):
         if self.training_sample_index < self.training_sample_size:
             try:
                 #classify tweet with LSA
-                tweet_processed = self._lsa_model.apply_LSA_on_raw_data(log_file_name=self.lsa_log_filename,
-                                                                            tweet_json=tweet_json,
-                                                                            preserve_var_percentage=self.lsa_var_percentage,
-                                                                            min_cos_value=self.lsa_min_cos_val)
+                tweet_processed = self._lsa_model.apply_LSA_on_raw_data(tweet_json=tweet_json,
+                                                                        preserve_var_percentage=self.lsa_var_percentage,
+                                                                        min_cos_value=self.lsa_min_cos_val
+                                                                        )
                 if tweet_processed is not None:
                     self.training_sample_index += 1
 
@@ -135,7 +134,7 @@ class CustomListener(StreamListener):
 
                     buf_text_label = 'lsa_' + str(self.training_sample_index)
                     buf_text = 'Num# ' + str(self.training_sample_index) + \
-                                            ' | cluster #' + \
+                                            ' | Cluster #' + \
                                             str(tweet_processed['cluster_index']+1) + '\n' + \
                                             tweet_json['text'] + \
                                             '\n===============================================\n'
@@ -147,9 +146,10 @@ class CustomListener(StreamListener):
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print(exc_type, fname, exc_tb.tb_lineno)
         elif not self.NB_trained:
-            self._naive_bayes_helper.read_sample_file(self.log_filename)
-            X, Y = self._naive_bayes_helper.create_X_Y()
+            training_sample_arr = self._lsa_model.get_training_sample()
+            X, Y = self._naive_bayes_helper.create_X_Y(training_sample_arr)
             self._naive_bayes_helper.fit_direct(X=X, Y=Y)
+
             self.NB_trained = True
         else:
             try:
@@ -159,6 +159,7 @@ class CustomListener(StreamListener):
                 curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])
                 init_clusters = self._lsa_model.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
                 relevant_cluster = init_clusters[curr_cluster_index]
+
                 ################################################################
                 ## forming result ##############################################
                 ################################################################
@@ -180,7 +181,7 @@ class CustomListener(StreamListener):
                     self._quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
                     buf_text_label = 'nb_' + str(self.tweets_index)
-                    buf_text = 'Num# ' + str(self.tweets_index) + ' | cluster #' +\
+                    buf_text = 'Num# ' + str(self.tweets_index) + ' | Cluster #' +\
                                 str(curr_cluster_index[0] + 1) + '\n' +\
                                 tweet_json['text'] + \
                                 '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
