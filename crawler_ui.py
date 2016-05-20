@@ -292,8 +292,7 @@ class Window(QtGui.QMainWindow):
             locations = self.extract_lines(self.locs_filename)
             #endregion
             #region set crawler params
-            tmp = self.txtLogFilePath.text()
-            self.log_filename = tmp if '.txt' in tmp else tmp + '.txt'
+            self.log_filename = self.txtLogFilePath.text()
 
             preserve_var_percentage = float(self.txtVarPercent.text()) / 100.0
             min_cos_value = float(self.txtMinCos.text())

@@ -47,7 +47,7 @@ class CustomListener(StreamListener):
         self._init_contexts = self._lsa_model.get_raw_contexts()
         #set pars
         lsa_log_filename = log_filename if '.json' in log_filename else log_filename + '.json'
-        self.lsa_log_file = open(self.lsa_log_filename, 'w')
+        self.lsa_log_file = open(lsa_log_filename, 'w')
         self.lsa_var_percentage = preserve_var_percentage
         self.lsa_min_cos_val = min_cos_val
         self.max_cos_val_NB = max_cos_val_NB
@@ -147,6 +147,9 @@ class CustomListener(StreamListener):
                 print(exc_type, fname, exc_tb.tb_lineno)
         elif not self.NB_trained:
             training_sample_arr = self._lsa_model.get_training_sample()
+            self.lsa_log_file.write(json.dumps(training_sample_arr))
+            self.lsa_log_file.close()
+
             X, Y = self._naive_bayes_helper.create_X_Y(training_sample_arr)
             self._naive_bayes_helper.fit_direct(X=X, Y=Y)
 
@@ -181,7 +184,7 @@ class CustomListener(StreamListener):
                     self._quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
                     buf_text_label = 'nb_' + str(self.tweets_index)
-                    buf_text = 'Num# ' + str(self.tweets_index) + ' | Cluster #' +\
+                    buf_text = 'Num# ' + str(self.tweets_index+1) + ' | Cluster #' +\
                                 str(curr_cluster_index[0] + 1) + '\n' +\
                                 tweet_json['text'] + \
                                 '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
@@ -203,20 +206,8 @@ class CustomListener(StreamListener):
             total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
                                 '\nTotal average min cos: ' + str(total_mean_arr[1]) + \
                                 '\nTotal average max cos: ' + str(total_mean_arr[2]) + '\n'
-            self._result_file.write({"total_values": total_values_text})
-            self._result_file.write(',')
 
-            # write ratings to result file
-            sample_counts = self.get_sample_counts()
-            sample_counts_LSA = self.get_sample_counts_LSA()
-            buf_str = ''
-            for index in range(len(sample_counts_LSA)):
-                buf_str += 'Cluster #{0}: rating LSA: {1} | '.format(index, sample_counts_LSA[index])
-            buf_str += '\n'
-            for index in range(len(sample_counts)):
-                buf_str += 'Cluster #{0}: rating NB: {1} | '.format(index, sample_counts[index])
-
-            self._result_file.write({"ratings" :buf_str})
+            self._result_file.write(json.dumps({"total_values": total_values_text}))
             self._result_file.write(']')
             self._result_file.close()
             return False
