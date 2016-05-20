@@ -377,7 +377,7 @@ class Window(QtGui.QMainWindow):
                 crawler.filter_by_params(words=tracking_words, langs=langs, follows=follows, locations=locations)
 
                 # visualize results
-                self.richTxt.setText(crawler.get_result_str())
+                self.richTxt.setText(crawler.get_result_text())
                 CustomPlotter.plot(crawler.get_sample_counts(), cluster_names_hash, self.pic_filename, color='green')
                 try:
                     pic_name = 'lsa_' + self.pic_filename if self.pic_filename is not None else None

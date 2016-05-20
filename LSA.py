@@ -30,6 +30,9 @@ class LSA(object):
         self._init_clusters = None
         self._cluster_names_hash = {}
 
+        #sample holder
+        self._training_sample_arr = []
+
     # region Helper methods
 
     # region Private methods
@@ -269,7 +272,7 @@ class LSA(object):
     def apply_LSA_on_raw_data(self, log_file_name, tweet_json, preserve_var_percentage, min_cos_value):
         log_file_name = log_file_name if '.txt' in log_file_name else log_file_name + '.txt'
         log_file = open(log_file_name, 'a+')
-        json_str = None
+        json_obj = None
         try:
             #remove characters and lowercase the text
             tweet_text = self.process_text(tweet_json['text'])
@@ -296,15 +299,13 @@ class LSA(object):
                         #write to log file
                         init_clusters = self.get_init_clusters(preserve_var_percentage, min_cos_value)
                         if cluster in init_clusters:
-                            json_str = '{"cluster_index":'+\
-                                       str(clusters.index(cluster))+\
-                                       ',"cluster":'+\
-                                       str(cluster)+\
-                                       ',"context":"'+\
-                                       tweet_text+\
-                                       '","context_vector":'+\
-                                       str(vector)+'}'
-                            log_file.write(json_str + '\n')
+                            json_obj = {
+                                        "cluster_index": clusters.index(cluster),
+                                        "cluster": cluster,
+                                        "context": tweet_text,
+                                        "context_vector": vector
+                                        }
+                            self._training_sample_arr.append(json_obj)
             else:
                 raise Exception('Empty terms or contexts apply_LSA_to_raw_data')
         except Exception as ex:
@@ -313,5 +314,4 @@ class LSA(object):
             error_str = str(exc_type) + '\n' + str(fname) + '\n' + str(exc_tb.tb_lineno)
             print(error_str)
 
-        log_file.close()
-        return json_str
+        return json_obj

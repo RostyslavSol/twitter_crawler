@@ -1,6 +1,7 @@
 # Import necessary libs
 import sys
 import os
+import datetime
 import json
 import numpy as np
 from tweepy.streaming import StreamListener
@@ -63,14 +64,27 @@ class CustomListener(StreamListener):
         self.NB_trained = False
 
         #result
-        self._result_str = '\nCLASSIFICATION BY LSA\n\n'
+        time_stamp = str(datetime.datetime.now()).replace(' ', '-').replace(':', '_')
+        self._result_filename = 'result_' + time_stamp + '.json'
+        self._result_file = open(self._result_filename, 'w')
+        self._result_file.write('[')
+
         self._record_sample_counts = []
         self._record_sample_counts_LSA = []
         self._quality_cos_arr = []
 
     # region Public methods
-    def get_result_str(self):
-        return self._result_str
+    def get_result_text(self):
+        file = open(self._result_filename, 'r')
+        json_text = file.read()
+        json_arr = json.loads(json_text)
+
+        text = '\nCLASSIFICATION BY LSA (=) CLASSIFICATION BY NB (-) \n\n'
+        for obj in json_arr:
+            for prop in obj:
+                text += obj[prop]
+
+        return text
 
     def get_cluster_names_hash(self):
         return self._lsa_model.get_cluster_names_hash()
@@ -107,32 +121,36 @@ class CustomListener(StreamListener):
         if self.training_sample_index < self.training_sample_size:
             try:
                 #classify tweet with LSA
-                tweet_processed_str = self._lsa_model.apply_LSA_on_raw_data(log_file_name=self.lsa_log_filename,
+                tweet_processed = self._lsa_model.apply_LSA_on_raw_data(log_file_name=self.lsa_log_filename,
                                                                             tweet_json=tweet_json,
                                                                             preserve_var_percentage=self.lsa_var_percentage,
                                                                             min_cos_value=self.lsa_min_cos_val)
-                if tweet_processed_str is not None:
+                if tweet_processed is not None:
                     self.training_sample_index += 1
 
-                    tweet_processed = json.loads(tweet_processed_str)
-
+                    ################################################################
+                    ## writting to file ############################################
                     ################################################################
                     self._record_sample_counts_LSA.append(int(tweet_processed['cluster_index']))
-                    self._result_str += 'Num# ' + str(self.training_sample_index) + \
-                                       ' | cluster #' + \
-                                        str(tweet_processed['cluster_index']+1) + '\n'
-                    self._result_str += tweet_json['text'] + \
-                        '\n===============================================\n'
+
+                    buf_text_label = 'lsa_' + str(self.training_sample_index)
+                    buf_text = 'Num# ' + str(self.training_sample_index) + \
+                                            ' | cluster #' + \
+                                            str(tweet_processed['cluster_index']+1) + '\n' + \
+                                            tweet_json['text'] + \
+                                            '\n===============================================\n'
+                    self._result_file.write(json.dumps({buf_text_label: buf_text}))
+                    self._result_file.write(',')
                     ################################################################
             except Exception as ex:
-                print(ex.args[0])
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
         elif not self.NB_trained:
             self._naive_bayes_helper.read_sample_file(self.log_filename)
             X, Y = self._naive_bayes_helper.create_X_Y()
             self._naive_bayes_helper.fit_direct(X=X, Y=Y)
             self.NB_trained = True
-
-            self._result_str += '\nCLASSIFICATION BY NB\n\n'
         else:
             try:
                 #classify tweet with NB
@@ -141,7 +159,9 @@ class CustomListener(StreamListener):
                 curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])
                 init_clusters = self._lsa_model.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
                 relevant_cluster = init_clusters[curr_cluster_index]
-                ################################
+                ################################################################
+                ## forming result ##############################################
+                ################################################################
                 #add quality control
                 contexts = self._lsa_model.get_contexts()
                 ncos_arr = []
@@ -159,14 +179,19 @@ class CustomListener(StreamListener):
                     self._record_sample_counts.append(curr_cluster_index[0])
                     self._quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
-                    self._result_str += 'Num# ' + str(self.tweets_index) + ' | cluster #' + str(curr_cluster_index[0] + 1) + '\n'
-                    self._result_str += tweet_json['text'] + \
-                        '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
-                        '\nMin cos in cluster: ' + str(min_ncos_arr) + \
-                        '\nMax cos in cluster: ' + str(max_ncos_arr) + \
-                        '\n-----------------------------------------------------------------------------------------------\n'
+                    buf_text_label = 'nb_' + str(self.tweets_index)
+                    buf_text = 'Num# ' + str(self.tweets_index) + ' | cluster #' +\
+                                str(curr_cluster_index[0] + 1) + '\n' +\
+                                tweet_json['text'] + \
+                                '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
+                                '\nMin cos in cluster: ' + str(min_ncos_arr) + \
+                                '\nMax cos in cluster: ' + str(max_ncos_arr) + \
+                                '\n-----------------------------------------------------------------------------------------------\n'
+                    self._result_file.write(json.dumps({buf_text_label: buf_text}))
+                    self._result_file.write(',')
+
                     self.tweets_index += 1
-                ################################
+                ################################################################
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -174,9 +199,25 @@ class CustomListener(StreamListener):
 
         if self.tweets_index >= self.tweets_count:
             total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
-            self._result_str += '\n\n Total average cos: ' + str(total_mean_arr[0]) + \
-                                '\n Total average min cos: ' + str(total_mean_arr[1]) + \
-                                '\n Total average max cos: ' + str(total_mean_arr[2])
+            total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
+                                '\nTotal average min cos: ' + str(total_mean_arr[1]) + \
+                                '\nTotal average max cos: ' + str(total_mean_arr[2]) + '\n'
+            self._result_file.write({"total_values": total_values_text})
+            self._result_file.write(',')
+
+            # write ratings to result file
+            sample_counts = self.get_sample_counts()
+            sample_counts_LSA = self.get_sample_counts_LSA()
+            buf_str = ''
+            for index in range(len(sample_counts_LSA)):
+                buf_str += 'Cluster #{0}: rating LSA: {1} | '.format(index, sample_counts_LSA[index])
+            buf_str += '\n'
+            for index in range(len(sample_counts)):
+                buf_str += 'Cluster #{0}: rating NB: {1} | '.format(index, sample_counts[index])
+
+            self._result_file.write({"ratings" :buf_str})
+            self._result_file.write(']')
+            self._result_file.close()
             return False
         else:
             return True
@@ -213,8 +254,8 @@ class TwitterCrawler(object):
     def get_cluster_names_hash(self):
         return self._listener.get_cluster_names_hash()
 
-    def get_result_str(self):
-        return self._listener.get_result_str()
+    def get_result_text(self):
+        return self._listener.get_result_text()
 
     def get_init_clusters(self):
         return self._listener.get_init_clusters()
