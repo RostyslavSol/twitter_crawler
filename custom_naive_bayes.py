@@ -10,23 +10,12 @@ import json
 ##5) predict_with_NB() (to get the results)
 #############################################
 class HelperForNB(object):
-    def read_sample_file(self, json_sample_filename):
-        #get json sample from txt file
-        json_sample_filename = json_sample_filename if '.txt' in json_sample_filename else json_sample_filename + '.txt'
-        json_sample_file = open(json_sample_filename, 'r')
-        text = json_sample_file.read()
-
-        self.json_sample = text.split('\n')
-        if '' in self.json_sample:
-            self.json_sample.remove('')
-
     #parse json and form X & Y
-    def create_X_Y(self):
+    def create_X_Y(self, training_sample_arr):
         self.X = []
         self.Y = []
-        for json_str in self.json_sample:
+        for json_obj in training_sample_arr:
             try:
-                json_obj = json.loads(json_str)
                 if len(json_obj['cluster']) > 0:
                     self.X.append(json_obj['context_vector'])
                     self.Y.append(json_obj['cluster_index'])
