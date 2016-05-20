@@ -80,8 +80,7 @@ class CustomListener(StreamListener):
 
         text = '\nCLASSIFICATION BY LSA (=) CLASSIFICATION BY NB (-) \n\n'
         for obj in json_arr:
-            for prop in obj:
-                text += obj[prop]
+            text += obj['text']
 
         return text
 
@@ -132,13 +131,12 @@ class CustomListener(StreamListener):
                     ################################################################
                     self._record_sample_counts_LSA.append(int(tweet_processed['cluster_index']))
 
-                    buf_text_label = 'lsa_' + str(self.training_sample_index)
                     buf_text = 'Num# ' + str(self.training_sample_index) + \
                                             ' | Cluster #' + \
                                             str(tweet_processed['cluster_index']+1) + '\n' + \
                                             tweet_json['text'] + \
                                             '\n===============================================\n'
-                    self._result_file.write(json.dumps({buf_text_label: buf_text,
+                    self._result_file.write(json.dumps({'text': buf_text,
                                                         "cluster_index": tweet_processed['cluster_index']
                                                         }))
                     self._result_file.write(',')
@@ -185,7 +183,6 @@ class CustomListener(StreamListener):
                     self._record_sample_counts.append(curr_cluster_index)
                     self._quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
-                    buf_text_label = 'nb_' + str(self.tweets_index)
                     buf_text = 'Num# ' + str(self.tweets_index+1) + ' | Cluster #' +\
                                 str(curr_cluster_index + 1) + '\n' +\
                                 tweet_json['text'] + \
@@ -193,7 +190,7 @@ class CustomListener(StreamListener):
                                 '\nMin cos in cluster: ' + str(min_ncos_arr) + \
                                 '\nMax cos in cluster: ' + str(max_ncos_arr) + \
                                 '\n-----------------------------------------------------------------------------------------------\n'
-                    self._result_file.write(json.dumps({buf_text_label: buf_text,
+                    self._result_file.write(json.dumps({'text': buf_text,
                                                         "cluster_index": str(curr_cluster_index)
                                                         }))
                     self._result_file.write(',')
