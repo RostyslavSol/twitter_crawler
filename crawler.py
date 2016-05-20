@@ -120,7 +120,7 @@ class CustomListener(StreamListener):
         if self.training_sample_index < self.training_sample_size:
             try:
                 #classify tweet with LSA
-                tweet_processed = self._lsa_model.apply_LSA_on_raw_data(tweet_json=tweet_json,
+                tweet_processed = self._lsa_model.apply_LSA_on_raw_data(raw_data_obj=tweet_json,
                                                                         preserve_var_percentage=self.lsa_var_percentage,
                                                                         min_cos_value=self.lsa_min_cos_val
                                                                         )

@@ -275,11 +275,11 @@ class LSA(object):
 
     #working with raw_data in json format
     # public method
-    def apply_LSA_on_raw_data(self, tweet_json, preserve_var_percentage, min_cos_value):
+    def apply_LSA_on_raw_data(self, raw_data_obj, preserve_var_percentage, min_cos_value):
         json_obj = None
         try:
             #remove characters and lowercase the text
-            tweet_text = self.process_text(tweet_json['text'])
+            tweet_text = self.process_text(raw_data_obj['text'])
             terms = self.get_terms()
             tmp_contexts = self.get_contexts()
             #perform analysis
