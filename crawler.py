@@ -79,8 +79,9 @@ class CustomListener(StreamListener):
         json_arr = json.loads(json_text)
 
         text = '\nCLASSIFICATION BY LSA (=) CLASSIFICATION BY NB (-) \n\n'
-        for obj in json_arr:
-            text += obj['text']
+        for i in range(len(json_arr)-1):
+            text += json_arr[i]['text']
+        text += json_arr[-1]['total_values']
 
         return text
 
@@ -136,7 +137,7 @@ class CustomListener(StreamListener):
                                             str(tweet_processed['cluster_index']+1) + '\n' + \
                                             tweet_json['text'] + \
                                             '\n===============================================\n'
-                    self._result_file.write(json.dumps({'text': buf_text,
+                    self._result_file.write(json.dumps({"text": buf_text,
                                                         "cluster_index": tweet_processed['cluster_index']
                                                         }))
                     self._result_file.write(',')
@@ -190,7 +191,7 @@ class CustomListener(StreamListener):
                                 '\nMin cos in cluster: ' + str(min_ncos_arr) + \
                                 '\nMax cos in cluster: ' + str(max_ncos_arr) + \
                                 '\n-----------------------------------------------------------------------------------------------\n'
-                    self._result_file.write(json.dumps({'text': buf_text,
+                    self._result_file.write(json.dumps({"text": buf_text,
                                                         "cluster_index": str(curr_cluster_index)
                                                         }))
                     self._result_file.write(',')
