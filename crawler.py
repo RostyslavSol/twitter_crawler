@@ -161,7 +161,7 @@ class CustomListener(StreamListener):
                 #classify tweet with NB
                 _context = self._lsa_model.process_text(tweet_json['text'])
                 context_vector = self._lsa_model.get_context_vector(_context)
-                curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])
+                curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])[0]
                 init_clusters = self._lsa_model.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
                 relevant_cluster = init_clusters[curr_cluster_index]
 
@@ -182,19 +182,19 @@ class CustomListener(StreamListener):
 
                 #cycle condition
                 if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
-                    self._record_sample_counts.append(curr_cluster_index[0])
+                    self._record_sample_counts.append(curr_cluster_index)
                     self._quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
 
                     buf_text_label = 'nb_' + str(self.tweets_index)
                     buf_text = 'Num# ' + str(self.tweets_index+1) + ' | Cluster #' +\
-                                str(curr_cluster_index[0] + 1) + '\n' +\
+                                str(curr_cluster_index + 1) + '\n' +\
                                 tweet_json['text'] + \
                                 '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
                                 '\nMin cos in cluster: ' + str(min_ncos_arr) + \
                                 '\nMax cos in cluster: ' + str(max_ncos_arr) + \
                                 '\n-----------------------------------------------------------------------------------------------\n'
                     self._result_file.write(json.dumps({buf_text_label: buf_text,
-                                                        "cluster_index": curr_cluster_index[0]
+                                                        "cluster_index": str(curr_cluster_index)
                                                         }))
                     self._result_file.write(',')
 
