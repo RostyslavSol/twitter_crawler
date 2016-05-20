@@ -64,6 +64,12 @@ class LSA(object):
     # endregion
 
     # region Public methods
+    def get_training_sample(self):
+        if len(self._training_sample_arr) > 1:
+            return self._training_sample_arr.copy()
+        else:
+            return None
+
     def get_cluster_names_hash(self):
         return self._cluster_names_hash.copy()
 
@@ -269,9 +275,7 @@ class LSA(object):
 
     #working with raw_data in json format
     # public method
-    def apply_LSA_on_raw_data(self, log_file_name, tweet_json, preserve_var_percentage, min_cos_value):
-        log_file_name = log_file_name if '.txt' in log_file_name else log_file_name + '.txt'
-        log_file = open(log_file_name, 'a+')
+    def apply_LSA_on_raw_data(self, tweet_json, preserve_var_percentage, min_cos_value):
         json_obj = None
         try:
             #remove characters and lowercase the text
