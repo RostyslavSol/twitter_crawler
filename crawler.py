@@ -194,7 +194,7 @@ class CustomListener(StreamListener):
                                 '\nMax cos in cluster: ' + str(max_ncos_arr) + \
                                 '\n-----------------------------------------------------------------------------------------------\n'
                     self._result_file.write(json.dumps({buf_text_label: buf_text,
-                                                        "cluster_index": curr_cluster_index
+                                                        "cluster_index": curr_cluster_index[0]
                                                         }))
                     self._result_file.write(',')
 
