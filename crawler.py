@@ -45,6 +45,11 @@ class CustomListener(StreamListener):
         self._lsa_model = LSA(cluster_names=tracking_words, raw_terms=raw_terms, raw_contexts=raw_contexts)
         self._init_clusters = self._lsa_model.get_init_clusters(preserve_var_percentage, min_cos_val)
         self._init_contexts = self._lsa_model.get_raw_contexts()
+        #initialize sample control
+        self._sample_control_arr = []
+        for i in self._init_clusters:
+            self._sample_control_arr.append(0)
+        self._sample_slice = int(training_sample_size / len(self._init_clusters)) + 1
         #set pars
         lsa_log_filename = log_filename if '.json' in log_filename else log_filename + '.json'
         self.lsa_log_file = open(lsa_log_filename, 'w')
@@ -64,12 +69,10 @@ class CustomListener(StreamListener):
 
         #result
         time_stamp = str(datetime.datetime.now()).replace(' ', '-').replace(':', '_')
-        self._result_filename = 'result_' + time_stamp + '.json'
+        self._result_filename = 'result/result_' + time_stamp + '.json'
         self._result_file = open(self._result_filename, 'w')
         self._result_file.write('[')
 
-        self._record_sample_counts = []
-        self._record_sample_counts_LSA = []
         self._quality_cos_arr = []
 
     # region Public methods
@@ -88,17 +91,17 @@ class CustomListener(StreamListener):
     def get_cluster_names_hash(self):
         return self._lsa_model.get_cluster_names_hash()
 
-    def get_record_sample_counts(self):
-        return self._record_sample_counts.copy()
-
-    def get_record_sample_counts_LSA(self):
-        return self._record_sample_counts_LSA.copy()
-
     def get_init_clusters(self):
         return self._init_clusters.copy()
 
     def get_init_contexts(self):
         return self._init_contexts.copy()
+
+    def get_sample_counts(self):
+        if self.tweets_index >= self.tweets_count:
+            return self._sample_control_arr.copy()
+        else:
+            return None
 
     # endregion
 
@@ -121,16 +124,18 @@ class CustomListener(StreamListener):
                 #classify tweet with LSA
                 tweet_processed = self._lsa_model.apply_LSA_on_raw_data(raw_data_obj=tweet_json,
                                                                         preserve_var_percentage=self.lsa_var_percentage,
-                                                                        min_cos_value=self.lsa_min_cos_val
+                                                                        min_cos_value=self.lsa_min_cos_val,
+                                                                        sample_slice=self._sample_slice
                                                                         )
-                if tweet_processed is not None:
-                    self.training_sample_index += 1
+                if tweet_processed is not None and \
+                    self._sample_control_arr[int(tweet_processed['cluster_index'])] < self._sample_slice:
+                    #inc index
+                    self._sample_control_arr[int(tweet_processed['cluster_index'])] += 1
+                    self.training_sample_index = sum(self._sample_control_arr)
 
                     ################################################################
                     ## writting to file ############################################
                     ################################################################
-                    self._record_sample_counts_LSA.append(int(tweet_processed['cluster_index']))
-
                     buf_text = 'Num# ' + str(self.training_sample_index) + \
                                             ' | Cluster #' + \
                                             str(tweet_processed['cluster_index']+1) + '\n' + \
@@ -182,7 +187,8 @@ class CustomListener(StreamListener):
 
                 #cycle condition
                 if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
-                    self._record_sample_counts.append(curr_cluster_index)
+                    self._sample_control_arr[curr_cluster_index] += 1
+
                     self._quality_cos_arr.append((mean_ncos_arr, max_ncos_arr))
 
                     buf_text = 'Num# ' + str(self.training_sample_index + self.tweets_index + 1) + ' | Cluster #' +\
@@ -276,19 +282,7 @@ class TwitterCrawler(object):
 
     def get_sample_counts(self):
         if self._filtering_done:
-            record_sample_counts = self._listener.get_record_sample_counts()
-            np_arr = np.array(record_sample_counts)
-            sample_counts = np.bincount(np_arr).tolist()
-            return sample_counts
-        else:
-            return None
-
-    def get_sample_counts_LSA(self):
-        if self._filtering_done:
-            record_sample_counts = self._listener.get_record_sample_counts_LSA()
-            np_arr = np.array(record_sample_counts)
-            sample_counts = np.bincount(np_arr).tolist()
-            return sample_counts
+            return self._listener.get_sample_counts()
         else:
             return None
 
