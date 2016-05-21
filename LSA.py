@@ -32,6 +32,7 @@ class LSA(object):
 
         #sample holder
         self._training_sample_arr = []
+        self._training_sample_control_arr = []
 
     # region Helper methods
 
@@ -138,6 +139,7 @@ class LSA(object):
                                                   min_cos_value
                                                   )
             self._define_cluster_names()
+            self._training_sample_control_arr = [0 for i in self._init_clusters]
         return self._init_clusters.copy()
     # endregion
 
@@ -275,7 +277,7 @@ class LSA(object):
 
     #working with raw_data in json format
     # public method
-    def apply_LSA_on_raw_data(self, raw_data_obj, preserve_var_percentage, min_cos_value):
+    def apply_LSA_on_raw_data(self, raw_data_obj, preserve_var_percentage, min_cos_value, sample_slice):
         json_obj = None
         try:
             #remove characters and lowercase the text
@@ -304,12 +306,14 @@ class LSA(object):
                         init_clusters = self.get_init_clusters(preserve_var_percentage, min_cos_value)
                         if cluster in init_clusters:
                             json_obj = {
-                                        "cluster_index": clusters.index(cluster),
+                                        "cluster_index": init_clusters.index(cluster),
                                         "cluster": cluster,
                                         "context": tweet_text,
                                         "context_vector": vector
                                         }
-                            self._training_sample_arr.append(json_obj)
+                            if self._training_sample_control_arr[init_clusters.index(cluster)] < sample_slice:
+                                self._training_sample_control_arr[init_clusters.index(cluster)] += 1
+                                self._training_sample_arr.append(json_obj)
             else:
                 raise Exception('Empty terms or contexts apply_LSA_to_raw_data')
         except Exception as ex:
