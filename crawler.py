@@ -261,7 +261,15 @@ class TwitterCrawler(object):
             return None
 
     def get_ratings_json(self):
-        pass
+        json_str = ''
+        if self._filtering_done:
+            json_arr = []
+            ratings = self.get_sample_counts()
+            names = self.get_cluster_names_hash()
+            for i in range(len(names)):
+                json_arr.append({names[i]: str(ratings[i])})
+            json_str = json.dumps(json_arr)
+        return json_str
 
     def get_init_clusters(self):
         if self._filtering_done:
