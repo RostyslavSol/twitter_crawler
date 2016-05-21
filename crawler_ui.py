@@ -1,5 +1,7 @@
 import sys
 import os
+import json
+import numpy as np
 from PyQt4 import QtGui, QtCore
 from crawler import TwitterCrawler
 from custom_plotter import CustomPlotter
@@ -72,6 +74,38 @@ class Window(QtGui.QMainWindow):
         self.txtClusterCos.setText('')
         self.txtPicFilename.setText('')
 
+    def read_from_json_file(self):
+        try:
+            #read file
+            fileName = QtGui.QFileDialog.getOpenFileName()
+            file = open(fileName, 'r')
+            json_string = file.read()
+            json_arr = json.loads(json_string)
+            #form results
+            text = ''
+            tmp_sample_count_arr = []
+            for json_obj in json_arr:
+                try:
+                    text += json_obj['text']
+                    tmp_sample_count_arr.append(int(json_obj['cluster_index']))
+                except:pass
+            ratings = np.bincount(np.array(tmp_sample_count_arr))
+            names_hash = {}
+            for i in range(len(ratings)):
+                for json_obj in json_arr:
+                    if int(json_obj['cluster_index']) == i:
+                        names_hash.update({str(i): json_obj['cluster_name']})
+                        break
+            #visualize results
+            self.richTxt.setText(text)
+            CustomPlotter.plot(ratings, names_hash)
+
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            error_str = str(exc_type) + '\n' + str(fname) + '\n' + str(exc_tb.tb_lineno)
+            print(error_str)
+
     #region Layouts
     def default_layout(self):
         # ----------- Upper label -----------
@@ -131,6 +165,12 @@ class Window(QtGui.QMainWindow):
         btn.resize(btn.sizeHint())
         btn.move(20,270)
         btn.clicked.connect(self.show_file_dialog_locations)
+        # ----------- read from JSON file -------------
+        btn = QtGui.QPushButton("Read JSON file", self)
+        btn.setStyleSheet('font-size: 12pt;')
+        btn.resize(btn.sizeHint())
+        btn.move(20,310)
+        btn.clicked.connect(self.read_from_json_file)
 
     def analysis_layout(self):
         # ----------- input TermsFilePath -----------
@@ -377,7 +417,7 @@ class Window(QtGui.QMainWindow):
                 # visualize results
                 self.richTxt.setText(crawler.get_result_text())
                 CustomPlotter.plot(crawler.get_sample_counts(), cluster_names_hash, self.pic_filename, color='green')
-                
+
             except Exception as ex:
                 msg = QtGui.QMessageBox(self)
                 exc_type, exc_obj, exc_tb = sys.exc_info()
