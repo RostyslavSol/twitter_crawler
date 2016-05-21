@@ -79,9 +79,9 @@ class CustomListener(StreamListener):
         json_arr = json.loads(json_text)
 
         text = '\nCLASSIFICATION BY LSA (=) CLASSIFICATION BY NB (-) \n\n'
-        for i in range(len(json_arr)-1):
-            text += json_arr[i]['text']
-        text += json_arr[-1]['total_values']
+        for json_obj in json_arr:
+            text += json_obj['text'] + \
+            '\n-----------------------\n'
 
         return text
 
@@ -135,8 +135,7 @@ class CustomListener(StreamListener):
                     buf_text = 'Num# ' + str(self.training_sample_index) + \
                                             ' | Cluster #' + \
                                             str(tweet_processed['cluster_index']+1) + '\n' + \
-                                            tweet_json['text'] + \
-                                            '\n===============================================\n'
+                                            tweet_json['text']
                     self._result_file.write(json.dumps({"text": buf_text,
                                                         "cluster_index": tweet_processed['cluster_index']
                                                         }))
@@ -176,23 +175,21 @@ class CustomListener(StreamListener):
                     ncos_arr.append(self._ncos(context_vector, tmp_vector))
                 #record results
                 mean_ncos_arr = np.mean(ncos_arr)
-                min_ncos_arr = min(ncos_arr)
                 max_ncos_arr = max(ncos_arr)
 
                 #cycle condition
                 if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
                     self._record_sample_counts.append(curr_cluster_index)
-                    self._quality_cos_arr.append((mean_ncos_arr, min_ncos_arr, max_ncos_arr))
+                    self._quality_cos_arr.append((mean_ncos_arr, max_ncos_arr))
 
-                    buf_text = 'Num# ' + str(self.tweets_index+1) + ' | Cluster #' +\
+                    buf_text = 'Num# ' + str(self.training_sample_index + self.tweets_index + 1) + ' | Cluster #' +\
                                 str(curr_cluster_index + 1) + '\n' +\
-                                tweet_json['text'] + \
-                                '\n\nAverage cos in cluster: ' + str(mean_ncos_arr) + \
-                                '\nMin cos in cluster: ' + str(min_ncos_arr) + \
-                                '\nMax cos in cluster: ' + str(max_ncos_arr) + \
-                                '\n-----------------------------------------------------------------------------------------------\n'
+                                tweet_json['text']
+
                     self._result_file.write(json.dumps({"text": buf_text,
-                                                        "cluster_index": str(curr_cluster_index)
+                                                        "cluster_index": str(curr_cluster_index),
+                                                        'avg_cos': str(mean_ncos_arr),
+                                                        'max_cos': str(max_ncos_arr)
                                                         }))
                     self._result_file.write(',')
 
@@ -206,10 +203,9 @@ class CustomListener(StreamListener):
         if self.tweets_index >= self.tweets_count:
             total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
             total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
-                                '\nTotal average min cos: ' + str(total_mean_arr[1]) + \
-                                '\nTotal average max cos: ' + str(total_mean_arr[2]) + '\n'
+                                '\nTotal average max cos: ' + str(total_mean_arr[1])
 
-            self._result_file.write(json.dumps({"total_values": total_values_text}))
+            self._result_file.write(json.dumps({"text": total_values_text}))
             self._result_file.write(']')
             self._result_file.close()
             return False
