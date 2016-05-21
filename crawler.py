@@ -264,7 +264,7 @@ class TwitterCrawler(object):
             ratings = self.get_sample_counts()
             names = self.get_cluster_names_hash()
             for i in range(len(names)):
-                json_arr.append({names[i]: str(ratings[i])})
+                json_arr.append({names[str(i)]: str(ratings[i])})
             json_str = json.dumps(json_arr)
         return json_str
 
