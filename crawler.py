@@ -116,7 +116,6 @@ class CustomListener(StreamListener):
     def on_data(self, raw_data):
         #parse json
         tweet_json = json.loads(raw_data)
-        tweet_processed = None
         if self.training_sample_index < self.training_sample_size:
             try:
                 #classify tweet with LSA
@@ -136,8 +135,12 @@ class CustomListener(StreamListener):
                                             ' | Cluster #' + \
                                             str(tweet_processed['cluster_index']+1) + '\n' + \
                                             tweet_json['text']
+                    cluster_names_hash = self.get_cluster_names_hash()
+                    curr_cluster_name = cluster_names_hash[str(tweet_processed['cluster_index'])]
+
                     self._result_file.write(json.dumps({"text": buf_text,
-                                                        "cluster_index": tweet_processed['cluster_index']
+                                                        "cluster_index": tweet_processed['cluster_index'],
+                                                        "cluster_name": curr_cluster_name
                                                         }))
                     self._result_file.write(',')
                     ################################################################
@@ -185,9 +188,12 @@ class CustomListener(StreamListener):
                     buf_text = 'Num# ' + str(self.training_sample_index + self.tweets_index + 1) + ' | Cluster #' +\
                                 str(curr_cluster_index + 1) + '\n' +\
                                 tweet_json['text']
+                    cluster_names_hash = self.get_cluster_names_hash()
+                    curr_cluster_name = cluster_names_hash[str(curr_cluster_index)]
 
                     self._result_file.write(json.dumps({"text": buf_text,
                                                         "cluster_index": str(curr_cluster_index),
+                                                        "cluster_name": curr_cluster_name,
                                                         'avg_cos': str(mean_ncos_arr),
                                                         'max_cos': str(max_ncos_arr)
                                                         }))
