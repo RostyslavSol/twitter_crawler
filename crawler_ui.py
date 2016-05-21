@@ -86,7 +86,7 @@ class Window(QtGui.QMainWindow):
             tmp_sample_count_arr = []
             for json_obj in json_arr:
                 try:
-                    text += json_obj['text']
+                    text += json_obj['text'] + '\n\n'
                     tmp_sample_count_arr.append(int(json_obj['cluster_index']))
                 except:pass
             ratings = np.bincount(np.array(tmp_sample_count_arr))
@@ -348,7 +348,7 @@ class Window(QtGui.QMainWindow):
             max_cos_val_NB = None
             tweets_count = None
             training_sample_size = None
-            self.pic_filename = None
+            pic_filename = None
 
             msg = QtGui.QMessageBox(self)
             msg.setText(ex.args[0])
@@ -416,7 +416,7 @@ class Window(QtGui.QMainWindow):
 
                 # visualize results
                 self.richTxt.setText(crawler.get_result_text())
-                CustomPlotter.plot(crawler.get_sample_counts(), cluster_names_hash, self.pic_filename, color='green')
+                CustomPlotter.plot(crawler.get_sample_counts(), cluster_names_hash, pic_filename, color='green')
 
             except Exception as ex:
                 msg = QtGui.QMessageBox(self)

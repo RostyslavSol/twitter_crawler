@@ -6,7 +6,6 @@ class CustomPlotter(object):
     @staticmethod
     def plot(sample_count_arr, cluster_names_hash, save_filename=None,  color=None):
         N = len(sample_count_arr)
-        sample_std = [1 for i in range(N)]
 
         ind = np.arange(N)  # the x locations for the groups
         #TODO: calculate width
@@ -14,7 +13,7 @@ class CustomPlotter(object):
 
         fig, ax = plt.subplots()
         color = color if color is not None else 'green'
-        rects = ax.bar(ind, sample_count_arr, width, color=color, yerr=sample_std)
+        rects = ax.bar(ind, sample_count_arr, width, color=color)
 
         # add some text for labels, title and axes ticks
         ax.set_ylabel('Sample count')
