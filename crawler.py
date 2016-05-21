@@ -249,10 +249,7 @@ class TwitterCrawler(object):
         self._filtering_done = False
 
     def get_cluster_names_hash(self):
-        if self._filtering_done:
-            return self._listener.get_cluster_names_hash()
-        else:
-            return None
+        return self._listener.get_cluster_names_hash()
 
     def get_result_text(self):
         if self._filtering_done:
@@ -272,16 +269,10 @@ class TwitterCrawler(object):
         return json_str
 
     def get_init_clusters(self):
-        if self._filtering_done:
-            return self._listener.get_init_clusters()
-        else:
-            return None
+        return self._listener.get_init_clusters()
 
     def get_init_contexts(self):
-        if self._filtering_done:
-            return self._listener.get_init_contexts()
-        else:
-            return None
+        return self._listener.get_init_contexts()
 
     def get_sample_counts(self):
         if self._filtering_done:
