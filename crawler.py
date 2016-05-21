@@ -245,34 +245,57 @@ class TwitterCrawler(object):
                                         )
         auth = OAuthHandler(API_KEY, API_SECRET)
         auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-        self.stream = Stream(auth, self._listener)
+        self._stream = Stream(auth, self._listener)
+        self._filtering_done = False
 
     def get_cluster_names_hash(self):
-        return self._listener.get_cluster_names_hash()
+        if self._filtering_done:
+            return self._listener.get_cluster_names_hash()
+        else:
+            return None
 
     def get_result_text(self):
-        return self._listener.get_result_text()
+        if self._filtering_done:
+            return self._listener.get_result_text()
+        else:
+            return None
+
+    def get_ratings_json(self):
+        pass
 
     def get_init_clusters(self):
-        return self._listener.get_init_clusters()
+        if self._filtering_done:
+            return self._listener.get_init_clusters()
+        else:
+            return None
 
     def get_init_contexts(self):
-        return self._listener.get_init_contexts()
+        if self._filtering_done:
+            return self._listener.get_init_contexts()
+        else:
+            return None
 
     def get_sample_counts(self):
-        record_sample_counts = self._listener.get_record_sample_counts()
-        np_arr = np.array(record_sample_counts)
-        sample_counts = np.bincount(np_arr).tolist()
-        return sample_counts
+        if self._filtering_done:
+            record_sample_counts = self._listener.get_record_sample_counts()
+            np_arr = np.array(record_sample_counts)
+            sample_counts = np.bincount(np_arr).tolist()
+            return sample_counts
+        else:
+            return None
 
     def get_sample_counts_LSA(self):
-        record_sample_counts = self._listener.get_record_sample_counts_LSA()
-        np_arr = np.array(record_sample_counts)
-        sample_counts = np.bincount(np_arr).tolist()
-        return sample_counts
+        if self._filtering_done:
+            record_sample_counts = self._listener.get_record_sample_counts_LSA()
+            np_arr = np.array(record_sample_counts)
+            sample_counts = np.bincount(np_arr).tolist()
+            return sample_counts
+        else:
+            return None
 
     def filter_by_params(self, words=None, langs=None, follows=None, locations=None):
-        self.stream.filter(track=words,
-                           languages=langs,
-                           follow=follows,
-                           locations=locations)
+        self._stream.filter(track=words,
+                            languages=langs,
+                            follow=follows,
+                            locations=locations)
+        self._filtering_done = True
