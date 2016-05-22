@@ -132,11 +132,9 @@ class CustomListener(StreamListener):
                                                                         sample_slice=self._sample_slice
                                                                         )
                 overfitting_control_arr = self._lsa_model.get_overfitting_control_arr()
+                self.training_sample_index = sum(overfitting_control_arr)
                 if tweet_processed is not None and \
                     overfitting_control_arr[int(tweet_processed['cluster_index'])] < self._sample_slice:
-                    #inc index
-                    self.training_sample_index = sum(overfitting_control_arr)
-
                     ################################################################
                     ## writting to file ############################################
                     ################################################################
@@ -241,7 +239,6 @@ class CustomListener(StreamListener):
         if self.tweets_index >= self.tweets_count:
             flow_time_fin = time.time()
             t = flow_time_fin - self._flow_time_start
-            poisson_means = [int(lambda_i*t) for lambda_i in self._poisson_flow_intensities]
 
             total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
             total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
