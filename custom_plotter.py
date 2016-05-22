@@ -21,8 +21,9 @@ class CustomPlotter(object):
         ax.set_title('Ratings for clusters ' + title_apendix)
         ax.set_xticks(ind + width)
         ax.set_xticklabels(['Cluster #' + str(i+1) + ' ' + cluster_names_hash[str(i)] for i in range(N)])
-        
-        #ax.legend([rects[0], ['Cluster #1', 'Cluster #2'])
+
+        max_height = int(max(sample_count_arr) * 1.25)
+        ax.set_ylim(0, max_height)
         
         def autolabel(rects):
             # attach some text labels
