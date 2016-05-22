@@ -237,14 +237,12 @@ class CustomListener(StreamListener):
             flow_time_fin = time.time()
             t = flow_time_fin - self._flow_time_start
             poisson_means = [int(lambda_i*t) for lambda_i in self._poisson_flow_intensities]
-            poisson_probs = [(lambda_i*t)**n_i / np.math.factorial(n_i) * np.exp(-lambda_i*t)
-                                     for lambda_i, n_i in zip(self._poisson_flow_intensities, poisson_means)]
 
             total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
             total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
                                 '\nTotal average max cos: ' + str(total_mean_arr[1]) + \
-                                '\nPoisson flow intensities: ' + str(["{0:.5} ".format(l)
-                                                                      for l in self._poisson_flow_intensities]) + \
+                                '\nPoisson flow intensities: ' + str("lambda={0:.5} ".format(l)
+                                                                      for l in self._poisson_flow_intensities) + \
                                 '\nTime elapsed (sec): ' + str(t)
 
             self._result_file.write(json.dumps({"text": total_values_text}))
