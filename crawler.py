@@ -242,8 +242,9 @@ class CustomListener(StreamListener):
             total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
             total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
                                 '\nTotal average max cos: ' + str(total_mean_arr[1]) + \
-                                '\nPoisson means: ' + str(poisson_means) + \
-                                '\nProbabilities: ' + str(poisson_probs)
+                                '\nPoisson flow intensities: ' + str(["{0:.5} ".format(l)
+                                                                      for l in self._poisson_flow_intensities]) + \
+                                '\nTime elapsed (sec): ' + str(t)
 
             self._result_file.write(json.dumps({"text": total_values_text}))
             self._result_file.write(']')
