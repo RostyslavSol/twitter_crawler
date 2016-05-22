@@ -79,6 +79,132 @@ class CustomListener(StreamListener):
         self._intensities_set_flag = False
         self._quality_cos_arr = []
 
+    #region Private methods
+    def _create_training_sample(self, tweet_json):
+        #classify tweet with LSA
+        tweet_processed = self._lsa_model.apply_LSA_on_raw_data(raw_data_obj=tweet_json,
+                                                                preserve_var_percentage=self.lsa_var_percentage,
+                                                                min_cos_value=self.lsa_min_cos_val,
+                                                                sample_slice=self._sample_slice
+                                                                )
+        overfitting_control_arr = self._lsa_model.get_overfitting_control_arr()
+        self.training_sample_index = sum(overfitting_control_arr)
+        if tweet_processed is not None and \
+            overfitting_control_arr[int(tweet_processed['cluster_index'])] < self._sample_slice:
+            ################################################################
+            ## writting to file ############################################
+            ################################################################
+            buf_text = 'Num# ' + str(self.training_sample_index) + \
+                                    ' | Cluster #' + \
+                                    str(tweet_processed['cluster_index']+1) + '\n' + \
+                                    tweet_json['text']
+            cluster_names_hash = self.get_cluster_names_hash()
+            curr_cluster_name = cluster_names_hash[str(tweet_processed['cluster_index'])]
+
+            self._result_file.write(json.dumps({"text": buf_text,
+                                                "cluster_index": tweet_processed['cluster_index'],
+                                                "cluster_name": curr_cluster_name
+                                                }))
+            self._result_file.write(',')
+            ################################################################
+
+    def _train_classifier(self):
+        training_sample_arr = self._lsa_model.get_training_sample()
+        #count LSA training sample as initially classified tweets
+        self._sample_count_arr = self._lsa_model.get_overfitting_control_arr()
+
+        self.lsa_log_file.write(json.dumps(training_sample_arr))
+        self.lsa_log_file.close()
+
+        X, Y = self._naive_bayes_helper.create_X_Y(training_sample_arr)
+        self._naive_bayes_helper.fit_direct(X=X, Y=Y)
+
+        self.NB_trained = True
+        self._flow_time_start = time.time()
+
+    def _process_pois_intensities(self, tweet_json):
+        #classify tweet with NB
+        _context = self._lsa_model.process_text(tweet_json['text'])
+        context_vector = self._lsa_model.get_context_vector(_context)
+        curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])[0]
+
+        if self._poisson_flow_intensities[curr_cluster_index] == 0:
+            fin_time = time.time()
+            download_time = fin_time - self._flow_time_start
+            self._poisson_flow_intensities[curr_cluster_index] = 1.0 / download_time
+
+        if not(0 in self._poisson_flow_intensities):
+            self._intensities_set_flag = True
+
+    def _classify_tweets(self, tweet_json):
+        #classify tweet with NB
+        _context = self._lsa_model.process_text(tweet_json['text'])
+        context_vector = self._lsa_model.get_context_vector(_context)
+        curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])[0]
+        init_clusters = self._lsa_model.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
+        relevant_cluster = init_clusters[curr_cluster_index]
+
+        ################################################################
+        ## forming result ##############################################
+        ################################################################
+        #add quality control
+        contexts = self._lsa_model.get_contexts()
+        ncos_arr = []
+        for rc_index in relevant_cluster:
+            context_in_cluster = contexts[rc_index-1]
+            tmp_vector = self._lsa_model.get_context_vector(context_in_cluster)
+            ncos_arr.append(self._ncos(context_vector, tmp_vector))
+        #record results
+        mean_ncos_arr = np.mean(ncos_arr)
+        max_ncos_arr = max(ncos_arr)
+
+        #writting to log
+        print("cluster_index:{0} max_cos:{1} tweet_index:{2}".format(curr_cluster_index,
+                                                                     max_ncos_arr,
+                                                                     self.tweets_index))
+
+        #cycle condition
+        if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
+            self._sample_count_arr[curr_cluster_index] += 1
+
+            self._quality_cos_arr.append((mean_ncos_arr, max_ncos_arr))
+
+            buf_text = 'Num# ' + str(self.training_sample_index + self.tweets_index + 1) + ' | Cluster #' +\
+                        str(curr_cluster_index + 1) + '\n' +\
+                        tweet_json['text']
+            cluster_names_hash = self.get_cluster_names_hash()
+            curr_cluster_name = cluster_names_hash[str(curr_cluster_index)]
+
+            self._result_file.write(json.dumps({"text": buf_text,
+                                                "cluster_index": str(curr_cluster_index),
+                                                "cluster_name": curr_cluster_name,
+                                                'avg_cos': str(mean_ncos_arr),
+                                                'max_cos': str(max_ncos_arr)
+                                                }))
+            self._result_file.write(',')
+
+            self.tweets_index += 1
+        ################################################################
+
+    def _finalize_classify(self):
+        flow_time_fin = time.time()
+        t = flow_time_fin - self._flow_time_start
+
+        total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
+        total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
+                            '\nTotal average max cos: ' + str(total_mean_arr[1]) + \
+                            '\nPoisson flow intensities: ' + str(["{0:.5}".format(l)
+                                                                  for l in self._poisson_flow_intensities]) + \
+                            '\nTime elapsed (sec): ' + str(t)
+        #logging
+        print(self._poisson_flow_intensities)
+        #
+        self._result_file.write(json.dumps({"text": total_values_text}))
+        self._result_file.write(']')
+        self._result_file.close()
+
+    #endregion
+
     # region Public methods
     def get_result_text(self):
         file = open(self._result_filename, 'r')
@@ -125,133 +251,25 @@ class CustomListener(StreamListener):
         tweet_json = json.loads(raw_data)
         if self.training_sample_index < self.training_sample_size:
             try:
-                #classify tweet with LSA
-                tweet_processed = self._lsa_model.apply_LSA_on_raw_data(raw_data_obj=tweet_json,
-                                                                        preserve_var_percentage=self.lsa_var_percentage,
-                                                                        min_cos_value=self.lsa_min_cos_val,
-                                                                        sample_slice=self._sample_slice
-                                                                        )
-                overfitting_control_arr = self._lsa_model.get_overfitting_control_arr()
-                self.training_sample_index = sum(overfitting_control_arr)
-                if tweet_processed is not None and \
-                    overfitting_control_arr[int(tweet_processed['cluster_index'])] < self._sample_slice:
-                    ################################################################
-                    ## writting to file ############################################
-                    ################################################################
-                    buf_text = 'Num# ' + str(self.training_sample_index) + \
-                                            ' | Cluster #' + \
-                                            str(tweet_processed['cluster_index']+1) + '\n' + \
-                                            tweet_json['text']
-                    cluster_names_hash = self.get_cluster_names_hash()
-                    curr_cluster_name = cluster_names_hash[str(tweet_processed['cluster_index'])]
-
-                    self._result_file.write(json.dumps({"text": buf_text,
-                                                        "cluster_index": tweet_processed['cluster_index'],
-                                                        "cluster_name": curr_cluster_name
-                                                        }))
-                    self._result_file.write(',')
-                    ################################################################
+                self._create_training_sample(tweet_json=tweet_json)
             except Exception as ex:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print(exc_type, fname, exc_tb.tb_lineno)
         elif not self.NB_trained:
-            training_sample_arr = self._lsa_model.get_training_sample()
-            #count LSA training sample as initially classified tweets
-            self._sample_count_arr = self._lsa_model.get_overfitting_control_arr()
-
-            self.lsa_log_file.write(json.dumps(training_sample_arr))
-            self.lsa_log_file.close()
-
-            X, Y = self._naive_bayes_helper.create_X_Y(training_sample_arr)
-            self._naive_bayes_helper.fit_direct(X=X, Y=Y)
-
-            self.NB_trained = True
-            self._flow_time_start = time.time()
+            self._train_classifier()
         elif not self._intensities_set_flag:
-            #classify tweet with NB
-            _context = self._lsa_model.process_text(tweet_json['text'])
-            context_vector = self._lsa_model.get_context_vector(_context)
-            curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])[0]
-
-            if self._poisson_flow_intensities[curr_cluster_index] == 0:
-                fin_time = time.time()
-                download_time = fin_time - self._flow_time_start
-                self._poisson_flow_intensities[curr_cluster_index] = 1.0 / download_time
-
-            if not(0 in self._poisson_flow_intensities):
-                self._intensities_set_flag = True
+            self._process_pois_intensities(tweet_json=tweet_json)
         else:
             try:
-                #classify tweet with NB
-                _context = self._lsa_model.process_text(tweet_json['text'])
-                context_vector = self._lsa_model.get_context_vector(_context)
-                curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])[0]
-                init_clusters = self._lsa_model.get_init_clusters(self.lsa_var_percentage, self.lsa_min_cos_val)
-                relevant_cluster = init_clusters[curr_cluster_index]
-
-                ################################################################
-                ## forming result ##############################################
-                ################################################################
-                #add quality control
-                contexts = self._lsa_model.get_contexts()
-                ncos_arr = []
-                for rc_index in relevant_cluster:
-                    context_in_cluster = contexts[rc_index-1]
-                    tmp_vector = self._lsa_model.get_context_vector(context_in_cluster)
-                    ncos_arr.append(self._ncos(context_vector, tmp_vector))
-                #record results
-                mean_ncos_arr = np.mean(ncos_arr)
-                max_ncos_arr = max(ncos_arr)
-
-                #writting to log
-                print("cluster_index:{0} max_cos:{1} tweet_index:{2}".format(curr_cluster_index,
-                                                                             max_ncos_arr,
-                                                                             self.tweets_index))
-
-                #cycle condition
-                if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
-                    self._sample_count_arr[curr_cluster_index] += 1
-
-                    self._quality_cos_arr.append((mean_ncos_arr, max_ncos_arr))
-
-                    buf_text = 'Num# ' + str(self.training_sample_index + self.tweets_index + 1) + ' | Cluster #' +\
-                                str(curr_cluster_index + 1) + '\n' +\
-                                tweet_json['text']
-                    cluster_names_hash = self.get_cluster_names_hash()
-                    curr_cluster_name = cluster_names_hash[str(curr_cluster_index)]
-
-                    self._result_file.write(json.dumps({"text": buf_text,
-                                                        "cluster_index": str(curr_cluster_index),
-                                                        "cluster_name": curr_cluster_name,
-                                                        'avg_cos': str(mean_ncos_arr),
-                                                        'max_cos': str(max_ncos_arr)
-                                                        }))
-                    self._result_file.write(',')
-
-                    self.tweets_index += 1
-                ################################################################
+                self._classify_tweets(tweet_json=tweet_json)
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
                 print(exc_type, fname, exc_tb.tb_lineno)
 
         if self.tweets_index >= self.tweets_count:
-            flow_time_fin = time.time()
-            t = flow_time_fin - self._flow_time_start
-
-            total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
-            total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
-                                '\nTotal average max cos: ' + str(total_mean_arr[1]) + \
-                                '\nPoisson flow intensities: ' + str(["{0:.5}".format(l)
-                                                                      for l in self._poisson_flow_intensities]) + \
-                                '\nTime elapsed (sec): ' + str(t)
-            #logging
-            print(self._poisson_flow_intensities)
-            #
-            self._result_file.write(json.dumps({"text": total_values_text}))
-            self._result_file.write(']')
-            self._result_file.close()
+            self._finalize_classify()
             return False
         else:
             return True
