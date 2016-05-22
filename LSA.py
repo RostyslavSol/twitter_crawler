@@ -270,7 +270,7 @@ class LSA(object):
             rel_matr.append([])
             for j in range(0, i):
                 rel_matr[i - 1].append(float(cos(svd_reconstruction[:, i], svd_reconstruction[:, j])))
-            print(rel_matr[i - 1])
+            #print(rel_matr[i - 1])
         self.rel_matr = rel_matr
 
         # clusterize contexts

@@ -48,7 +48,7 @@ class CustomListener(StreamListener):
         self._init_contexts = self._lsa_model.get_raw_contexts()
 
         #initialize sample control
-        self._sample_count_arr = [0 for i in self._init_clusters]
+        self._sample_count_arr = None
         self._sample_slice = int(training_sample_size / len(self._init_clusters)) + 1
 
         #set pars
@@ -179,7 +179,7 @@ class CustomListener(StreamListener):
             if self._poisson_flow_intensities[curr_cluster_index] == 0:
                 fin_time = time.time()
                 download_time = fin_time - self._flow_time_start
-                self._poisson_flow_intensities[curr_cluster_index] = float(1 / download_time)
+                self._poisson_flow_intensities[curr_cluster_index] = 1.0 / download_time
 
             if not(0 in self._poisson_flow_intensities):
                 self._intensities_set_flag = True
@@ -205,6 +205,11 @@ class CustomListener(StreamListener):
                 #record results
                 mean_ncos_arr = np.mean(ncos_arr)
                 max_ncos_arr = max(ncos_arr)
+
+                #writting to log
+                print("cluster_index:{0} max_cos:{1} tweet_index:{2}".format(curr_cluster_index,
+                                                                             max_ncos_arr,
+                                                                             self.tweets_index))
 
                 #cycle condition
                 if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
