@@ -270,7 +270,7 @@ class LSA(object):
             rel_matr.append([])
             for j in range(0, i):
                 rel_matr[i - 1].append(float(cos(svd_reconstruction[:, i], svd_reconstruction[:, j])))
-            #print(rel_matr[i - 1])
+            print(rel_matr[i - 1])
         self.rel_matr = rel_matr
 
         # clusterize contexts
@@ -317,7 +317,6 @@ class LSA(object):
                             if self._overfitting_control_arr[init_clusters.index(cluster)] < sample_slice:
                                 self._overfitting_control_arr[init_clusters.index(cluster)] += 1
                                 self._training_sample_arr.append(json_obj)
-                                print(self._overfitting_control_arr)
             else:
                 raise Exception('Empty terms or contexts apply_LSA_to_raw_data')
         except Exception as ex:

@@ -159,6 +159,8 @@ class CustomListener(StreamListener):
                 print(exc_type, fname, exc_tb.tb_lineno)
         elif not self.NB_trained:
             training_sample_arr = self._lsa_model.get_training_sample()
+            #count LSA training sample as initially classified tweets
+            self._sample_count_arr = self._lsa_model.get_overfitting_control_arr()
 
             self.lsa_log_file.write(json.dumps(training_sample_arr))
             self.lsa_log_file.close()
@@ -177,7 +179,7 @@ class CustomListener(StreamListener):
             if self._poisson_flow_intensities[curr_cluster_index] == 0:
                 fin_time = time.time()
                 download_time = fin_time - self._flow_time_start
-                self._poisson_flow_intensities[curr_cluster_index] = 1.0 / download_time
+                self._poisson_flow_intensities[curr_cluster_index] = float(1 / download_time)
 
             if not(0 in self._poisson_flow_intensities):
                 self._intensities_set_flag = True
@@ -203,11 +205,6 @@ class CustomListener(StreamListener):
                 #record results
                 mean_ncos_arr = np.mean(ncos_arr)
                 max_ncos_arr = max(ncos_arr)
-
-                #writting to log
-                print("cluster_index:{0} max_cos:{1} tweet_index:{2}".format(curr_cluster_index,
-                                                                             max_ncos_arr,
-                                                                             self.tweets_index))
 
                 #cycle condition
                 if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
