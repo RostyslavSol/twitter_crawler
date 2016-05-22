@@ -1,6 +1,7 @@
 # Import necessary libs
 import sys
 import os
+import time
 import datetime
 import json
 import numpy as np
@@ -45,11 +46,11 @@ class CustomListener(StreamListener):
         self._lsa_model = LSA(cluster_names=tracking_words, raw_terms=raw_terms, raw_contexts=raw_contexts)
         self._init_clusters = self._lsa_model.get_init_clusters(preserve_var_percentage, min_cos_val)
         self._init_contexts = self._lsa_model.get_raw_contexts()
+
         #initialize sample control
-        self._overfitting_control_arr = []
-        for i in self._init_clusters:
-            self._overfitting_control_arr.append(0)
+        self._overfitting_control_arr = [0 for i in self._init_clusters]
         self._sample_slice = int(training_sample_size / len(self._init_clusters)) + 1
+
         #set pars
         lsa_log_filename = log_filename if '.json' in log_filename else log_filename + '.json'
         self.lsa_log_file = open(lsa_log_filename, 'w')
@@ -73,6 +74,9 @@ class CustomListener(StreamListener):
         self._result_file = open(self._result_filename, 'w')
         self._result_file.write('[')
 
+        self._poisson_flow_intensities = [0 for i in self._init_clusters]
+        self._flow_time_start = None
+        self._intensities_set_flag = False
         self._quality_cos_arr = []
 
     # region Public methods
@@ -164,6 +168,20 @@ class CustomListener(StreamListener):
             self._naive_bayes_helper.fit_direct(X=X, Y=Y)
 
             self.NB_trained = True
+            self._flow_time_start = time.time()
+        elif not self._intensities_set_flag:
+            #classify tweet with NB
+            _context = self._lsa_model.process_text(tweet_json['text'])
+            context_vector = self._lsa_model.get_context_vector(_context)
+            curr_cluster_index = self._naive_bayes_helper.predict_with_NB([context_vector])[0]
+
+            if self._poisson_flow_intensities[curr_cluster_index] == 0:
+                fin_time = time.time()
+                download_time = fin_time - self._flow_time_start
+                self._poisson_flow_intensities[curr_cluster_index] = float(1 / download_time)
+
+            if not(0 in self._poisson_flow_intensities):
+                self._intensities_set_flag = True
         else:
             try:
                 #classify tweet with NB
@@ -215,9 +233,17 @@ class CustomListener(StreamListener):
                 print(exc_type, fname, exc_tb.tb_lineno)
 
         if self.tweets_index >= self.tweets_count:
+            flow_time_fin = time.time()
+            t = flow_time_fin - self._flow_time_start
+            poisson_means = [int(lambda_i*t) for lambda_i in self._poisson_flow_intensities]
+            poisson_probs = [(lambda_i*t)**n_i / np.math.factorial(n_i) * np.exp(-lambda_i*t)
+                                     for lambda_i, n_i in zip(self._poisson_flow_intensities, poisson_means)]
+
             total_mean_arr = np.mean(self._quality_cos_arr, axis=0)
             total_values_text = '\n\nTotal average cos: ' + str(total_mean_arr[0]) + \
-                                '\nTotal average max cos: ' + str(total_mean_arr[1])
+                                '\nTotal average max cos: ' + str(total_mean_arr[1]) + \
+                                '\nPoisson means: ' + str(poisson_means) + \
+                                '\nProbabilities: ' + str(poisson_probs)
 
             self._result_file.write(json.dumps({"text": total_values_text}))
             self._result_file.write(']')
