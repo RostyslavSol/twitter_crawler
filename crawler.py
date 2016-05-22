@@ -48,7 +48,7 @@ class CustomListener(StreamListener):
         self._init_contexts = self._lsa_model.get_raw_contexts()
 
         #initialize sample control
-        self._overfitting_control_arr = [0 for i in self._init_clusters]
+        self._sample_count_arr = [0 for i in self._init_clusters]
         self._sample_slice = int(training_sample_size / len(self._init_clusters)) + 1
 
         #set pars
@@ -103,7 +103,7 @@ class CustomListener(StreamListener):
 
     def get_sample_counts(self):
         if self.tweets_index >= self.tweets_count:
-            return self._overfitting_control_arr.copy()
+            return self._sample_count_arr.copy()
         else:
             return None
 
@@ -159,7 +159,8 @@ class CustomListener(StreamListener):
                 print(exc_type, fname, exc_tb.tb_lineno)
         elif not self.NB_trained:
             training_sample_arr = self._lsa_model.get_training_sample()
-            self._overfitting_control_arr = self._lsa_model.get_overfitting_control_arr()
+            #count LSA training sample as initially classified tweets
+            self._sample_count_arr = self._lsa_model.get_overfitting_control_arr()
 
             self.lsa_log_file.write(json.dumps(training_sample_arr))
             self.lsa_log_file.close()
@@ -207,7 +208,7 @@ class CustomListener(StreamListener):
 
                 #cycle condition
                 if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
-                    self._overfitting_control_arr[curr_cluster_index] += 1
+                    self._sample_count_arr[curr_cluster_index] += 1
 
                     self._quality_cos_arr.append((mean_ncos_arr, max_ncos_arr))
 
