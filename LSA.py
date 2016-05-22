@@ -32,7 +32,7 @@ class LSA(object):
 
         #sample holder
         self._training_sample_arr = []
-        self._training_sample_control_arr = []
+        self._overfitting_control_arr = []
 
     # region Helper methods
 
@@ -65,6 +65,9 @@ class LSA(object):
     # endregion
 
     # region Public methods
+    def get_overfitting_control_arr(self):
+        return self._overfitting_control_arr.copy()
+
     def get_training_sample(self):
         if len(self._training_sample_arr) > 1:
             return self._training_sample_arr.copy()
@@ -139,7 +142,7 @@ class LSA(object):
                                                   min_cos_value
                                                   )
             self._define_cluster_names()
-            self._training_sample_control_arr = [0 for i in self._init_clusters]
+            self._overfitting_control_arr = [0 for i in self._init_clusters]
         return self._init_clusters.copy()
     # endregion
 
@@ -311,8 +314,8 @@ class LSA(object):
                                         "context": tweet_text,
                                         "context_vector": vector
                                         }
-                            if self._training_sample_control_arr[init_clusters.index(cluster)] < sample_slice:
-                                self._training_sample_control_arr[init_clusters.index(cluster)] += 1
+                            if self._overfitting_control_arr[init_clusters.index(cluster)] < sample_slice:
+                                self._overfitting_control_arr[init_clusters.index(cluster)] += 1
                                 self._training_sample_arr.append(json_obj)
             else:
                 raise Exception('Empty terms or contexts apply_LSA_to_raw_data')

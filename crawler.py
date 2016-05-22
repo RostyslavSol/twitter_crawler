@@ -46,9 +46,9 @@ class CustomListener(StreamListener):
         self._init_clusters = self._lsa_model.get_init_clusters(preserve_var_percentage, min_cos_val)
         self._init_contexts = self._lsa_model.get_raw_contexts()
         #initialize sample control
-        self._sample_control_arr = []
+        self._overfitting_control_arr = []
         for i in self._init_clusters:
-            self._sample_control_arr.append(0)
+            self._overfitting_control_arr.append(0)
         self._sample_slice = int(training_sample_size / len(self._init_clusters)) + 1
         #set pars
         lsa_log_filename = log_filename if '.json' in log_filename else log_filename + '.json'
@@ -99,7 +99,7 @@ class CustomListener(StreamListener):
 
     def get_sample_counts(self):
         if self.tweets_index >= self.tweets_count:
-            return self._sample_control_arr.copy()
+            return self._overfitting_control_arr.copy()
         else:
             return None
 
@@ -127,11 +127,11 @@ class CustomListener(StreamListener):
                                                                         min_cos_value=self.lsa_min_cos_val,
                                                                         sample_slice=self._sample_slice
                                                                         )
+                overfitting_control_arr = self._lsa_model.get_overfitting_control_arr()
                 if tweet_processed is not None and \
-                    self._sample_control_arr[int(tweet_processed['cluster_index'])] < self._sample_slice:
+                    overfitting_control_arr[int(tweet_processed['cluster_index'])] < self._sample_slice:
                     #inc index
-                    self._sample_control_arr[int(tweet_processed['cluster_index'])] += 1
-                    self.training_sample_index = sum(self._sample_control_arr)
+                    self.training_sample_index = sum(overfitting_control_arr)
 
                     ################################################################
                     ## writting to file ############################################
@@ -155,6 +155,8 @@ class CustomListener(StreamListener):
                 print(exc_type, fname, exc_tb.tb_lineno)
         elif not self.NB_trained:
             training_sample_arr = self._lsa_model.get_training_sample()
+            self._overfitting_control_arr = self._lsa_model.get_overfitting_control_arr()
+
             self.lsa_log_file.write(json.dumps(training_sample_arr))
             self.lsa_log_file.close()
 
@@ -187,7 +189,7 @@ class CustomListener(StreamListener):
 
                 #cycle condition
                 if max_ncos_arr > self.max_cos_val_NB and self.NB_trained:
-                    self._sample_control_arr[curr_cluster_index] += 1
+                    self._overfitting_control_arr[curr_cluster_index] += 1
 
                     self._quality_cos_arr.append((mean_ncos_arr, max_ncos_arr))
 
