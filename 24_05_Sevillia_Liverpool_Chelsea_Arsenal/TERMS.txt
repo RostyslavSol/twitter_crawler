@@ -8,6 +8,8 @@ DavidSoria18
 Reds
 Lallana
 Liverpool
+LiverpoolFC
+FC
 favourite
 LFC
 Guus
@@ -15,6 +17,7 @@ spotlight
 CFC
 IsaacHayden65
 Arsenal
+ArsenalFC
 Crowley
 AFC
 Terry
@@ -24,4 +27,5 @@ VitalityUK
 JHenderson
 Alexis_Sanchez
 Chelsea
+ChelseaFC
 Hiddink
