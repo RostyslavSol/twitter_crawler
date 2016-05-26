@@ -109,16 +109,17 @@ class LSA(object):
             .replace('.', ' ') \
             .replace(':', ' ') \
             .replace('-', ' ') \
+            .replace('_', ' ') \
             .replace('!', ' ') \
             .replace('?', ' ') \
-            .replace('\n',' ')\
-            .replace("'", '')\
-            .replace('"', '')\
-            .replace('#', '')\
-            .replace('@', '')\
-            .replace('&gt;', '')\
-            .replace('&amp;', '')\
-            .replace("'s", '')\
+            .replace('\n',' ') \
+            .replace("'", '') \
+            .replace('"', '') \
+            .replace('#', '') \
+            .replace('@', '') \
+            .replace('&gt;', '') \
+            .replace('&amp;', '') \
+            .replace("'s", '') \
             .lower()
 
         return text
