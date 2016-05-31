@@ -42,7 +42,7 @@ class Window(QtGui.QMainWindow):
 
         #UI initialization
         super(Window, self).__init__()
-        self.setGeometry(10, 10, 1500, 1000)
+        self.setGeometry(0, 30, 1500, 1000)
         self.setWindowTitle('Main window')
 
         #visualize layout
